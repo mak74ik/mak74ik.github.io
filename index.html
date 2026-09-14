@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta name="theme-color" content="#af0d08">
+  <meta name="theme-color" content="#0a0a0c">
   <title>Yoshi</title>
   
   <!-- Open Graph & Meta -->
@@ -38,12 +38,13 @@
       --font-mono: 'JetBrains Mono', monospace;
       --theme-color: #404040;
       --accent-color: #F97316;
+      --accent-glow: rgba(249, 115, 22, 0.25);
       --text-main: #FFFFFF;
       --text-muted: #A8A29E;
-      --card-bg: rgba(28, 12, 16, 0.42);
-      --card-border: rgba(140, 125, 125, 0.28);
-      --card-blur: 24px;
-      --card-radius: 24px;
+      --card-bg: rgba(20, 14, 18, 0.58);
+      --card-border: rgba(140, 125, 125, 0.22);
+      --card-blur: 28px;
+      --card-radius: 26px;
     }
 
     * {
@@ -56,45 +57,63 @@
     html, body {
       width: 100%;
       height: 100%;
-      background-color: #000000;
+      background-color: #08080a;
       color: var(--text-main);
       font-family: var(--font-main);
       overflow-x: hidden;
       user-select: none;
     }
 
-    /* Background Video Container */
-    .bg-video-wrapper {
+    /* Ambient Background Canvas & Glow Orbs */
+    #bg-canvas {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       z-index: 1;
-      overflow: hidden;
       pointer-events: none;
     }
 
-    .bg-video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      filter: blur(2px) brightness(0.8);
-      transform: scale(1.04);
-      transition: filter 0.8s ease;
+    .ambient-glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.18;
+      animation: floatGlow 12s ease-in-out infinite alternate;
     }
 
-    .bg-tint {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle at center, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.75) 100%);
+    .glow-1 {
+      top: 10%;
+      left: 15%;
+      background: #7f1d1d;
     }
 
-    /* Subtle Scanlines / Noise Overlay */
-    .noise-overlay {
+    .glow-2 {
+      bottom: 10%;
+      right: 15%;
+      background: #ea580c;
+      animation-delay: -6s;
+    }
+
+    @keyframes floatGlow {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+      50% {
+        transform: translate(40px, -30px) scale(1.08);
+      }
+      100% {
+        transform: translate(-30px, 40px) scale(0.95);
+      }
+    }
+
+    /* Subtle Grid / Noise Overlay */
+    .grid-overlay {
       position: fixed;
       top: 0;
       left: 0;
@@ -102,8 +121,11 @@
       height: 100%;
       z-index: 2;
       pointer-events: none;
-      opacity: 0.04;
-      background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.15) 0px, transparent 1px, transparent 2px);
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.7;
     }
 
     /* Click to Enter Overlay Screen */
@@ -117,9 +139,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
+      background: rgba(8, 8, 10, 0.85);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
       cursor: pointer;
       transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s;
     }
@@ -137,11 +159,11 @@
       color: #FFFFFF;
       text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
       animation: pulseText 2s ease-in-out infinite alternate;
-      padding: 16px 24px;
+      padding: 16px 28px;
       border-radius: 9999px;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
     }
 
     @keyframes pulseText {
@@ -153,40 +175,6 @@
         opacity: 1;
         transform: scale(1.02);
       }
-    }
-
-    /* Floating Sound Control Button */
-    .sound-btn {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 60;
-      background: rgba(18, 18, 22, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 9999px;
-      width: 44px;
-      height: 44px;
-      color: #FFFFFF;
-      cursor: pointer;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.25s ease;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-    }
-
-    .sound-btn:hover {
-      background: rgba(30, 30, 38, 0.9);
-      border-color: var(--accent-color);
-      transform: scale(1.08);
-    }
-
-    .sound-btn svg {
-      width: 20px;
-      height: 20px;
-      fill: currentColor;
     }
 
     /* Main Container & Profile Card */
@@ -210,7 +198,7 @@
       border: 1.5px solid var(--card-border);
       border-radius: var(--card-radius);
       padding: 32px 36px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 35px rgba(255, 255, 255, 0.03);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 40px rgba(0, 0, 0, 0.5);
       opacity: 0;
       transform: translateY(30px);
       transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
@@ -276,31 +264,6 @@
       align-items: center;
       flex-wrap: wrap;
       gap: 8px;
-    }
-
-    .badge-invited {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 8px;
-      padding: 3px 8px;
-      font-size: 0.72rem;
-      font-weight: 500;
-      color: #E2E8F0;
-      transition: all 0.2s ease;
-    }
-
-    .badge-invited:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.25);
-    }
-
-    .badge-invited svg {
-      width: 12px;
-      height: 12px;
-      fill: var(--accent-color);
     }
 
     .badge-tag {
@@ -409,7 +372,7 @@
       background: rgba(255, 255, 255, 0.1);
       border-color: var(--accent-color);
       transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(249, 115, 22, 0.2);
+      box-shadow: 0 4px 15px var(--accent-glow);
     }
 
     .social-btn svg {
@@ -459,7 +422,7 @@
       height: 13px;
       border-radius: 50%;
       border: 2.5px solid #141416;
-      background-color: #747f8d; /* default offline */
+      background-color: #747f8d;
     }
 
     .status-indicator.online { background-color: #23a55a; }
@@ -477,7 +440,9 @@
       font-size: 0.9rem;
       font-weight: 600;
       color: #FFFFFF;
-      truncate: true;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .discord-status {
@@ -488,9 +453,158 @@
       text-overflow: ellipsis;
     }
 
+    /* =========================================================
+       RIGHT SIDE FLOATING PROJECT SWITCHER (DOCK)
+       ========================================================= */
+    .projects-dock {
+      position: fixed;
+      right: 28px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: rgba(18, 14, 18, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 12px 10px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .dock-title {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent-color);
+      text-align: center;
+      padding-bottom: 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 4px;
+    }
+
+    .dock-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
+      text-decoration: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dock-item:hover {
+      background: rgba(249, 115, 22, 0.15);
+      border-color: var(--accent-color);
+      transform: scale(1.08) translateX(-4px);
+      box-shadow: 0 4px 18px var(--accent-glow);
+    }
+
+    .dock-item svg {
+      width: 22px;
+      height: 22px;
+      fill: #FFFFFF;
+      transition: fill 0.2s ease;
+    }
+
+    .dock-item:hover svg {
+      fill: var(--accent-color);
+    }
+
+    /* Flyout Tooltip to the Left */
+    .dock-tooltip {
+      position: absolute;
+      right: 56px;
+      top: 50%;
+      transform: translateY(-50%) scale(0.95);
+      background: rgba(15, 12, 16, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 8px 14px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .dock-tooltip-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dock-tooltip-title svg {
+      width: 12px;
+      height: 12px;
+      fill: var(--accent-color);
+    }
+
+    .dock-tooltip-desc {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .dock-item:hover .dock-tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(-50%) scale(1);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 860px) {
+      .main-wrapper {
+        padding-bottom: 90px;
+      }
+      .projects-dock {
+        right: auto;
+        left: 50%;
+        top: auto;
+        bottom: 16px;
+        transform: translateX(-50%);
+        flex-direction: row;
+        border-radius: 9999px;
+        padding: 6px 10px;
+        gap: 8px;
+        background: rgba(18, 14, 18, 0.85);
+      }
+      .dock-title {
+        display: none;
+      }
+      .dock-item {
+        width: 40px;
+        height: 40px;
+      }
+      .dock-tooltip {
+        right: auto;
+        left: 50%;
+        top: -46px;
+        transform: translateX(-50%) scale(0.95);
+      }
+      .dock-item:hover .dock-tooltip {
+        transform: translateX(-50%) scale(1);
+      }
+    }
+
     @media (max-width: 480px) {
       .profile-card {
         padding: 24px 20px;
+        margin-bottom: 70px;
       }
       .card-top {
         gap: 16px;
@@ -511,26 +625,15 @@
 </head>
 <body>
 
-  <!-- Background Video -->
-  <div class="bg-video-wrapper">
-    <video id="bg-video" class="bg-video" loop muted playsinline disablepictureinpicture src="assets/background.mp4"></video>
-    <div class="bg-tint"></div>
-  </div>
+  <!-- Animated Stars Canvas -->
+  <canvas id="bg-canvas"></canvas>
 
-  <!-- Noise Overlay -->
-  <div class="noise-overlay"></div>
+  <!-- Ambient Glow Orbs -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
 
-  <!-- Sound Toggle Button -->
-  <button id="sound-btn" class="sound-btn" title="Toggle Sound" aria-label="Toggle Sound">
-    <!-- Unmuted Icon -->
-    <svg id="icon-sound-on" style="display:none;" viewBox="0 0 24 24">
-      <path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-2.5 9h-3.5v-4.5h3.5l4.5-4.5v13.5l-4.5-4.5zm-5 0v-4.5h-3.5v4.5h3.5z"/>
-    </svg>
-    <!-- Muted Icon -->
-    <svg id="icon-sound-off" viewBox="0 0 24 24">
-      <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27l4.73 4.73H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
-    </svg>
-  </button>
+  <!-- Subtle Cyberpunk Grid Overlay -->
+  <div class="grid-overlay"></div>
 
   <!-- Reveal Overlay Screen -->
   <div id="reveal-screen">
@@ -551,12 +654,6 @@
             <h1 class="username">mizyqa</h1>
           </div>
           <div class="badges-row">
-            <div class="badge-invited" title="Invited Member">
-              <svg viewBox="0 0 512 512">
-                <path d="M416 172h-40v-52a120 120 0 0 0-240 0v52H96a60 60 0 0 0-60 60v220a60 60 0 0 0 60 60h320a60 60 0 0 0 60-60V232a60 60 0 0 0-60-60m-220-52a60 60 0 0 1 120 0v52H196zm90 244v38a30 30 0 1 1-60 0v-38a60 60 0 1 1 60 0"></path>
-              </svg>
-              <span>Invited</span>
-            </div>
             <div class="badge-tag">Yoshi</div>
           </div>
         </div>
@@ -582,7 +679,7 @@
       <!-- Bio / Specs Quote -->
       <div class="bio-content">
 ▿ ɴɪᴄᴋ: mizyqa | Yoshi | Cody
-▿ ᴀɢᴇ: 18
+▿ ᴀɢᴇ: 19
 ▿ ᴛᴇᴀᴍ:
 ▿ Sex: )))
 ▿ ꜱᴋɪʟʟ: low
@@ -651,66 +748,153 @@
     </div>
   </div>
 
+  <!-- =========================================================
+       RIGHT SIDE FLOATING PROJECT SWITCHER
+       ========================================================= -->
+  <aside class="projects-dock" aria-label="Projects Switcher">
+    <div class="dock-title">Projects</div>
+
+    <!-- GitHub Profile -->
+    <a href="https://github.com/mak74ik" target="_blank" rel="noopener noreferrer" class="dock-item" aria-label="GitHub Profile">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+      </svg>
+      <div class="dock-tooltip">
+        <span class="dock-tooltip-title">
+          GitHub
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+        <span class="dock-tooltip-desc">@mak74ik • Code & Repos</span>
+      </div>
+    </a>
+
+    <!-- Nexus Mods Profile -->
+    <a href="https://www.nexusmods.com/users/mak74ik" target="_blank" rel="noopener noreferrer" class="dock-item" aria-label="Nexus Mods">
+      <svg viewBox="0 0 24 24">
+        <path d="M12.793 0L3.652 5.275v13.45L12.793 24l9.141-5.275V5.275L12.793 0zm5.666 16.518l-5.666 3.27-5.667-3.27V9.98l5.667-3.27 5.666 3.27v6.538z"/>
+      </svg>
+      <div class="dock-tooltip">
+        <span class="dock-tooltip-title">
+          Nexus Mods
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+        <span class="dock-tooltip-desc">Game Mods & Profiles</span>
+      </div>
+    </a>
+
+    <!-- Alert Forecast Project -->
+    <a href="https://github.com/mak74ik/ukraine-alert-forecast" target="_blank" rel="noopener noreferrer" class="dock-item" aria-label="Alert Forecast">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V18a1 1 0 0 1-2 0v-1.07A6 6 0 0 1 6.07 12H5a1 1 0 0 1 0-2h1.07A6 6 0 0 1 11 5.07V4a1 1 0 0 1 2 0v1.07A6 6 0 0 1 17.93 10H19a1 1 0 0 1 0 2h-1.07A6 6 0 0 1 13 16.93zM12 8a4 4 0 1 0 4 4 4 4 0 0 0-4-4z"/>
+      </svg>
+      <div class="dock-tooltip">
+        <span class="dock-tooltip-title">
+          Alert Forecast
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+        <span class="dock-tooltip-desc">Ukraine Alert Tracker</span>
+      </div>
+    </a>
+
+    <!-- LiveWallpaper MacOS -->
+    <a href="https://github.com/mak74ik/LiveWallpaperMacOS" target="_blank" rel="noopener noreferrer" class="dock-item" aria-label="LiveWallpaper MacOS">
+      <svg viewBox="0 0 24 24">
+        <path d="M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm4 16h8v2H8v-2zm12-4V5H4v10h16z"/>
+      </svg>
+      <div class="dock-tooltip">
+        <span class="dock-tooltip-title">
+          LiveWallpaper
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+        <span class="dock-tooltip-desc">macOS Dynamic Engine</span>
+      </div>
+    </a>
+
+    <!-- Steam Profile / Workshop -->
+    <a href="https://steamcommunity.com/id/bribable/" target="_blank" rel="noopener noreferrer" class="dock-item" aria-label="Steam Workshop">
+      <svg viewBox="0 0 24 24">
+        <path d="M24 12c0 6.627-5.373 12-12 12-5.782 0-10.608-4.091-11.744-9.537l4.764 2.003c.285 1.441 1.56 2.547 3.115 2.534 1.723-.017 3.105-1.414 3.116-3.129l.007-.003 3.602-2.684c2.304.024 4.14-1.833 4.14-4.091 0-2.26-1.834-4.093-4.093-4.093-2.234 0-4.048 1.791-4.09 4.015l-2.64 3.693c-.668-.014-1.269.169-1.791.51l-6.294-2.646c.708-5.953 5.765-10.572 11.908-10.572 6.627 0 12 5.373 12 12z"/>
+      </svg>
+      <div class="dock-tooltip">
+        <span class="dock-tooltip-title">
+          Steam
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+        <span class="dock-tooltip-desc">Gaming & Workshop</span>
+      </div>
+    </a>
+  </aside>
+
   <script>
+    // -------------------------------------------------------------
+    // Starfield Particle Canvas (Zero battery drain, elegant drift)
+    // -------------------------------------------------------------
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const STARS_COUNT = 75;
+    const stars = [];
+
+    for (let i = 0; i < STARS_COUNT; i++) {
+      stars.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: Math.random() * 1.6 + 0.4,
+        alpha: Math.random() * 0.7 + 0.2,
+        speed: Math.random() * 0.25 + 0.08
+      });
+    }
+
+    function animateStars() {
+      ctx.clearRect(0, 0, width, height);
+      
+      for (let i = 0; i < STARS_COUNT; i++) {
+        const star = stars[i];
+        star.y -= star.speed;
+        if (star.y < 0) {
+          star.y = height;
+          star.x = Math.random() * width;
+        }
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      requestAnimationFrame(animateStars);
+    }
+    animateStars();
+
+    // -------------------------------------------------------------
+    // Reveal screen and Entrance
+    // -------------------------------------------------------------
     const revealScreen = document.getElementById('reveal-screen');
     const profileCard = document.getElementById('profile-card');
-    const bgVideo = document.getElementById('bg-video');
-    const soundBtn = document.getElementById('sound-btn');
-    const iconSoundOn = document.getElementById('icon-sound-on');
-    const iconSoundOff = document.getElementById('icon-sound-off');
 
-    function updateSoundUI(isMuted) {
-      if (isMuted) {
-        iconSoundOn.style.display = 'none';
-        iconSoundOff.style.display = 'block';
-      } else {
-        iconSoundOn.style.display = 'block';
-        iconSoundOff.style.display = 'none';
-      }
-    }
-
-    
-    if (window.location.search.includes('enter') || window.location.hash === '#enter') {
+    function enterBio() {
       revealScreen.classList.add('faded');
       profileCard.classList.add('active');
-    }
-
-    // Start experience on reveal click
-    revealScreen.addEventListener('click', () => {
-      revealScreen.classList.add('faded');
-      profileCard.classList.add('active');
-
-      if (bgVideo) {
-        bgVideo.muted = false;
-        bgVideo.volume = 0.6;
-        bgVideo.play().then(() => {
-          updateSoundUI(false);
-        }).catch(() => {
-          bgVideo.muted = true;
-          bgVideo.play();
-          updateSoundUI(true);
-        });
-      }
-
       startTitleTyping();
-    });
+    }
 
-    // Sound toggle
-    soundBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (!bgVideo) return;
-      if (bgVideo.muted) {
-        bgVideo.muted = false;
-        bgVideo.volume = 0.6;
-        bgVideo.play();
-        updateSoundUI(false);
-      } else {
-        bgVideo.muted = true;
-        updateSoundUI(true);
-      }
-    });
+    if (window.location.search.includes('enter') || window.location.hash === '#enter') {
+      enterBio();
+    } else {
+      revealScreen.addEventListener('click', enterBio);
+    }
 
+    // -------------------------------------------------------------
     // Typing Title Animation
+    // -------------------------------------------------------------
     function startTitleTyping() {
       const titleText = "Yoshi";
       let index = 0;
@@ -733,7 +917,9 @@
       }, 250);
     }
 
+    // -------------------------------------------------------------
     // Discord Lanyard Integration
+    // -------------------------------------------------------------
     async function loadDiscordStatus() {
       const discordId = "677098375576944640";
       try {
