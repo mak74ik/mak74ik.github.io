@@ -293,6 +293,45 @@
       text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
     }
 
+    /* Dynamic Letters Pop Engine */
+    .char-letter {
+      display: inline-block;
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                  color 0.2s ease, 
+                  text-shadow 0.2s ease;
+      will-change: transform, color, text-shadow;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .char-letter.is-big {
+      transform: scale(1.48) translateY(-4px) !important;
+      color: #38bdf8 !important;
+      text-shadow: 0 0 18px rgba(56, 189, 248, 0.95), 0 0 35px rgba(56, 189, 248, 0.6) !important;
+      font-weight: 800 !important;
+    }
+
+    .char-letter.is-huge {
+      transform: scale(1.75) translateY(-7px) rotate(-6deg) !important;
+      color: #FFFFFF !important;
+      text-shadow: 0 0 24px #38bdf8, 0 0 50px rgba(56, 189, 248, 0.9) !important;
+    }
+
+    /* Dynamic Pop for Bio elements */
+    .bio-pop {
+      display: inline-block;
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.22s ease, text-shadow 0.22s ease;
+      will-change: transform;
+      cursor: pointer;
+    }
+
+    .bio-pop.is-popped {
+      transform: scale(1.24) translateY(-2px);
+      color: #38bdf8 !important;
+      text-shadow: 0 0 14px rgba(56, 189, 248, 0.85);
+      font-weight: 700;
+    }
+
     .badges-row {
       display: flex;
       align-items: center;
@@ -311,22 +350,147 @@
       font-weight: 600;
       background: rgba(56, 189, 248, 0.08);
       box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
 
-    /* Location Row */
-    .location-row {
+    .badge-tag:hover {
+      background: rgba(56, 189, 248, 0.2);
+      transform: scale(1.06);
+    }
+
+    /* Cyber Telemetry Status Bar */
+    .telemetry-bar {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.8rem;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      padding: 8px 14px;
+      background: rgba(6, 10, 20, 0.6);
+      border: 1px solid rgba(56, 189, 248, 0.16);
+      border-radius: 14px;
+      font-size: 0.72rem;
       color: var(--text-muted);
       margin-bottom: 12px;
+      font-family: var(--font-mono);
+      letter-spacing: -0.01em;
     }
 
-    .location-row svg {
-      width: 14px;
-      height: 14px;
+    .telemetry-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .telemetry-icon {
+      width: 12px;
+      height: 12px;
       fill: var(--accent-color);
+    }
+
+    .telemetry-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+    }
+
+    .telemetry-dot.live-pulse {
+      animation: livePulseBeacon 2s infinite ease-in-out;
+    }
+
+    .telemetry-ping {
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    .telemetry-tag {
+      color: #FFFFFF;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .telemetry-sep {
+      opacity: 0.35;
+      font-size: 0.65rem;
+    }
+
+    /* Sound FX Toggle Button in Top Right */
+    .sfx-toggle-btn {
+      position: fixed;
+      top: 18px;
+      right: 20px;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(10, 15, 28, 0.75);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 20px;
+      color: #FFFFFF;
+      font-size: 0.72rem;
+      font-family: var(--font-main);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    .sfx-toggle-btn:hover {
+      background: rgba(14, 24, 44, 0.9);
+      border-color: var(--accent-color);
+      box-shadow: 0 0 15px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    .sfx-toggle-btn.muted {
+      opacity: 0.55;
+      border-color: rgba(148, 163, 184, 0.25);
+      color: var(--text-muted);
+    }
+
+    /* macOS Dynamic HUD Toast */
+    .hud-toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-65px) scale(0.9);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 22px;
+      background: rgba(8, 14, 28, 0.94);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 30px;
+      color: #FFFFFF;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7), 0 0 25px rgba(56, 189, 248, 0.25);
+      pointer-events: none;
+      opacity: 0;
+      transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .hud-toast.show {
+      transform: translateX(-50%) translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .hud-toast-icon {
+      width: 15px;
+      height: 15px;
+      fill: var(--accent-color);
+      flex-shrink: 0;
     }
 
     /* Gradient Divider */
@@ -544,6 +708,34 @@
       background: #38bdf8;
       box-shadow: 0 0 6px #38bdf8;
       animation: livePulseBeacon 2s infinite ease-in-out;
+    }
+
+    /* Activity Audio Equalizer */
+    .activity-equalizer {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 14px;
+      margin-left: auto;
+      padding-right: 2px;
+    }
+
+    .eq-bar {
+      width: 2.5px;
+      background: var(--accent-color);
+      border-radius: 2px;
+      animation: eqBounce 1.1s ease-in-out infinite alternate;
+    }
+
+    .eq-bar:nth-child(1) { height: 35%; animation-delay: 0.1s; }
+    .eq-bar:nth-child(2) { height: 95%; animation-delay: 0.35s; }
+    .eq-bar:nth-child(3) { height: 60%; animation-delay: 0.2s; }
+    .eq-bar:nth-child(4) { height: 85%; animation-delay: 0.45s; }
+
+    @keyframes eqBounce {
+      0% { height: 25%; opacity: 0.4; }
+      50% { height: 100%; opacity: 1; box-shadow: 0 0 8px var(--accent-color); }
+      100% { height: 45%; opacity: 0.65; }
     }
 
     .activity-body {
@@ -1068,6 +1260,17 @@
 </head>
 <body>
 
+  <!-- Sound FX Toggle Button -->
+  <button id="sfx-toggle-btn" class="sfx-toggle-btn" title="Toggle Cyber Sound Effects">
+    <span id="sfx-status-icon">🔊</span> SFX
+  </button>
+
+  <!-- macOS Dynamic HUD Toast -->
+  <div id="hud-toast" class="hud-toast">
+    <svg class="hud-toast-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+    <span id="hud-toast-text">Copied to clipboard!</span>
+  </div>
+
   <!-- Animated Stars Canvas -->
   <canvas id="bg-canvas"></canvas>
 
@@ -1111,20 +1314,31 @@
         </div>
         <div class="user-info">
           <div class="username-row">
-            <h1 class="username">mizyqa</h1>
+            <h1 class="username" id="bio-username" title="Click letters to pop!"><span class="char-letter" data-letter="m">m</span><span class="char-letter" data-letter="i">i</span><span class="char-letter" data-letter="z">z</span><span class="char-letter" data-letter="y">y</span><span class="char-letter" data-letter="q">q</span><span class="char-letter" data-letter="a">a</span></h1>
           </div>
           <div class="badges-row">
-            <div class="badge-tag">Yoshi</div>
+            <div class="badge-tag" id="badge-yoshi" title="Alias: Yoshi">Yoshi</div>
           </div>
         </div>
       </div>
 
-      <!-- Location -->
-      <div class="location-row">
-        <svg viewBox="0 0 24 24">
-          <path d="M12 0c-4.198 0-8 3.403-8 7.602 0 4.198 3.469 9.21 8 16.398 4.531-7.188 8-12.2 8-16.398 0-4.199-3.801-7.602-8-7.602zm0 11c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"></path>
-        </svg>
-        <span>в сети</span>
+      <!-- Cyber Telemetry Status Bar -->
+      <div class="telemetry-bar">
+        <div class="telemetry-item">
+          <svg class="telemetry-icon" viewBox="0 0 24 24"><path d="M12 0c-4.198 0-8 3.403-8 7.602 0 4.198 3.469 9.21 8 16.398 4.531-7.188 8-12.2 8-16.398 0-4.199-3.801-7.602-8-7.602zm0 11c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"></path></svg>
+          <span>Kyiv, UA</span>
+        </div>
+        <span class="telemetry-sep">•</span>
+        <div class="telemetry-item">
+          <span class="telemetry-dot live-pulse"></span>
+          <span id="live-clock">12:55:00</span>
+        </div>
+        <span class="telemetry-sep">•</span>
+        <div class="telemetry-item">
+          <span class="telemetry-ping">18ms</span>
+        </div>
+        <span class="telemetry-sep">•</span>
+        <div class="telemetry-tag">240km/h PEEK</div>
       </div>
 
       <!-- Divider -->
@@ -1137,12 +1351,12 @@
       <div class="divider"></div>
 
       <!-- Bio / Specs Quote -->
-      <div class="bio-content">
-▿ ɴɪᴄᴋ: mizyqa | Yoshi | Cody
-▿ ᴀɢᴇ: 19
+      <div class="bio-content" id="bio-content">
+▿ ɴɪᴄᴋ: <span class="bio-pop">mizyqa</span> | <span class="bio-pop">Yoshi</span> | <span class="bio-pop">Cody</span>
+▿ ᴀɢᴇ: <span class="bio-pop">19</span>
 ▿ ᴛᴇᴀᴍ:
-▿ Sex: )))
-▿ ꜱᴋɪʟʟ: low
+▿ Sex: <span class="bio-pop">)))</span>
+▿ ꜱᴋɪʟʟ: <span class="bio-pop">low</span>
 
 <div class="spec-title">MacBook Air 13" M2</div>
 ▿ Apple M2 (8-core CPU / 8-core GPU)
@@ -1163,7 +1377,7 @@
       <div class="footer-note">©spokoynich</div>
 
       <!-- Discord Presence Card -->
-      <div class="discord-card" id="discord-card">
+      <div class="discord-card" id="discord-card" title="Click to copy Discord tag">
         <div class="discord-top-row">
           <div class="discord-avatar-wrap">
             <img id="discord-avatar" src="assets/discord-avatar.webp" alt="Discord Avatar" class="discord-avatar">
@@ -1189,6 +1403,12 @@
           <div class="activity-header">
             <span class="activity-pulse-dot"></span>
             <span id="activity-type-label">PLAYING A GAME</span>
+            <div class="activity-equalizer" title="Live Voice / Game Activity">
+              <span class="eq-bar"></span>
+              <span class="eq-bar"></span>
+              <span class="eq-bar"></span>
+              <span class="eq-bar"></span>
+            </div>
           </div>
           <div class="activity-body">
             <div class="activity-img-wrap">
@@ -1197,7 +1417,7 @@
             <div class="activity-details">
               <div id="activity-name" class="activity-name">Grand Theft Auto 6</div>
               <div id="activity-details" class="activity-desc">Exploring Vice City</div>
-              <div id="activity-state" class="activity-sub">In Game • Active</div>
+              <div id="activity-state" class="activity-sub"><span id="activity-elapsed">02:44:19 elapsed</span> • Active</div>
             </div>
           </div>
         </div>
@@ -1364,7 +1584,7 @@
 
   <script>
     // -------------------------------------------------------------
-    // Starfield Particle Canvas (White/Blue Stars)
+    // Starfield Particle Canvas + Cursor Sparkles & Shockwaves
     // -------------------------------------------------------------
     const canvas = document.getElementById('bg-canvas');
     const ctx = canvas.getContext('2d');
@@ -1379,6 +1599,8 @@
 
     const STARS_COUNT = 85;
     const stars = [];
+    const cursorSparks = [];
+    const clickRipples = [];
 
     for (let i = 0; i < STARS_COUNT; i++) {
       const isBlue = Math.random() > 0.65;
@@ -1392,9 +1614,40 @@
       });
     }
 
+    // Interactive cursor sparkles
+    window.addEventListener('mousemove', (e) => {
+      if (Math.random() > 0.35) {
+        cursorSparks.push({
+          x: e.clientX + (Math.random() - 0.5) * 10,
+          y: e.clientY + (Math.random() - 0.5) * 10,
+          vx: (Math.random() - 0.5) * 1.4,
+          vy: (Math.random() - 0.5) * 1.4 - 0.4,
+          size: Math.random() * 2.2 + 1.0,
+          alpha: 0.85,
+          decay: Math.random() * 0.03 + 0.018,
+          color: Math.random() > 0.3 ? '56, 189, 248' : '255, 255, 255'
+        });
+      }
+    });
+
+    // Interactive click shockwaves
+    window.addEventListener('mousedown', (e) => {
+      clickRipples.push({
+        x: e.clientX,
+        y: e.clientY,
+        radius: 3,
+        maxRadius: 42,
+        alpha: 0.8
+      });
+      if (typeof playCyberSound === 'function') {
+        playCyberSound('click');
+      }
+    });
+
     function animateStars() {
       ctx.clearRect(0, 0, width, height);
       
+      // 1. Ambient Starfield
       for (let i = 0; i < STARS_COUNT; i++) {
         const star = stars[i];
         star.y -= star.speed;
@@ -1407,6 +1660,38 @@
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
         ctx.fill();
+      }
+
+      // 2. Cursor Sparkles
+      for (let i = cursorSparks.length - 1; i >= 0; i--) {
+        const sp = cursorSparks[i];
+        sp.x += sp.vx;
+        sp.y += sp.vy;
+        sp.alpha -= sp.decay;
+        if (sp.alpha <= 0) {
+          cursorSparks.splice(i, 1);
+          continue;
+        }
+        ctx.fillStyle = `rgba(${sp.color}, ${sp.alpha})`;
+        ctx.beginPath();
+        ctx.arc(sp.x, sp.y, sp.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 3. Click Shockwave Ripples
+      for (let i = clickRipples.length - 1; i >= 0; i--) {
+        const rp = clickRipples[i];
+        rp.radius += 2.2;
+        rp.alpha -= 0.045;
+        if (rp.alpha <= 0 || rp.radius >= rp.maxRadius) {
+          clickRipples.splice(i, 1);
+          continue;
+        }
+        ctx.strokeStyle = `rgba(56, 189, 248, ${rp.alpha})`;
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.arc(rp.x, rp.y, rp.radius, 0, Math.PI * 2);
+        ctx.stroke();
       }
 
       requestAnimationFrame(animateStars);
@@ -1500,10 +1785,12 @@
 
     function openDock() {
       document.body.classList.add('dock-open');
+      if (typeof playCyberSound === 'function') playCyberSound('whoosh');
     }
 
     function closeDock() {
       document.body.classList.remove('dock-open');
+      if (typeof playCyberSound === 'function') playCyberSound('click');
     }
 
     dockToggleTab.addEventListener('click', openDock);
@@ -1524,6 +1811,12 @@
     // -------------------------------------------------------------
     const dock = document.getElementById('macos-dock');
     const dockItems = dock.querySelectorAll('.dock-item');
+
+    dockItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        if (typeof playCyberSound === 'function') playCyberSound('blip', 540);
+      });
+    });
 
     dock.addEventListener('mousemove', (e) => {
       const mouseY = e.clientY;
@@ -1608,6 +1901,234 @@
       setTimeout(triggerLivingWink, nextDelay);
     }
     setTimeout(triggerLivingWink, 2200);
+
+    // -------------------------------------------------------------
+    // Web Audio API Synthesizer (Retro-Futuristic Cyber SFX)
+    // -------------------------------------------------------------
+    let sfxEnabled = true;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) audioCtx = new AudioContextClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playCyberSound(type, freq = 440) {
+      if (!sfxEnabled) return;
+      try {
+        initAudio();
+        if (!audioCtx) return;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'click') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(750, now);
+          osc.frequency.exponentialRampToValueAtTime(160, now + 0.04);
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+          osc.start(now);
+          osc.stop(now + 0.04);
+        } else if (type === 'blip') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now);
+          osc.frequency.exponentialRampToValueAtTime(freq * 1.35, now + 0.06);
+          gain.gain.setValueAtTime(0.045, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+          osc.start(now);
+          osc.stop(now + 0.06);
+        } else if (type === 'whoosh') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.exponentialRampToValueAtTime(580, now + 0.12);
+          gain.gain.setValueAtTime(0.05, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+          osc.start(now);
+          osc.stop(now + 0.12);
+        }
+      } catch (e) {}
+    }
+
+    const sfxBtn = document.getElementById('sfx-toggle-btn');
+    const sfxIcon = document.getElementById('sfx-status-icon');
+    if (sfxBtn) {
+      sfxBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        initAudio();
+        sfxEnabled = !sfxEnabled;
+        if (sfxEnabled) {
+          sfxBtn.classList.remove('muted');
+          if (sfxIcon) sfxIcon.textContent = '🔊';
+          showToast('Sound Effects: Enabled');
+          playCyberSound('blip', 680);
+        } else {
+          sfxBtn.classList.add('muted');
+          if (sfxIcon) sfxIcon.textContent = '🔇';
+          showToast('Sound Effects: Muted');
+        }
+      });
+    }
+
+    // -------------------------------------------------------------
+    // macOS Dynamic HUD Toast
+    // -------------------------------------------------------------
+    const hudToast = document.getElementById('hud-toast');
+    const hudToastText = document.getElementById('hud-toast-text');
+    let toastTimer = null;
+
+    function showToast(text) {
+      if (!hudToast || !hudToastText) return;
+      hudToastText.textContent = text;
+      hudToast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        hudToast.classList.remove('show');
+      }, 2200);
+    }
+
+    // -------------------------------------------------------------
+    // Dynamic Letters Pop Engine ("буквы иногда ставали большими")
+    // -------------------------------------------------------------
+    const charLetters = Array.from(document.querySelectorAll('.char-letter'));
+    const bioPops = Array.from(document.querySelectorAll('.bio-pop'));
+
+    function popSingleLetter(el, isHuge = false) {
+      if (!el) return;
+      const originalChar = el.getAttribute('data-letter') || el.textContent;
+      el.classList.add(isHuge ? 'is-huge' : 'is-big');
+      
+      // Capitalize during pop for extra glitch aesthetic
+      if (Math.random() > 0.3) {
+        el.textContent = originalChar.toUpperCase();
+      }
+      playCyberSound('blip', 650 + Math.random() * 450);
+
+      setTimeout(() => {
+        el.classList.remove('is-huge', 'is-big');
+        el.textContent = originalChar;
+      }, isHuge ? 650 : 450);
+    }
+
+    function scheduleLetterPop() {
+      if (charLetters.length > 0) {
+        const count = Math.random() > 0.6 ? 2 : 1;
+        for (let i = 0; i < count; i++) {
+          const randomLetter = charLetters[Math.floor(Math.random() * charLetters.length)];
+          popSingleLetter(randomLetter, Math.random() > 0.8);
+        }
+      }
+
+      // Also pop random bio word occasionally
+      if (Math.random() > 0.5 && bioPops.length > 0) {
+        const randomBio = bioPops[Math.floor(Math.random() * bioPops.length)];
+        randomBio.classList.add('is-popped');
+        setTimeout(() => randomBio.classList.remove('is-popped'), 600);
+      }
+
+      const nextPop = Math.floor(Math.random() * 1500) + 1500;
+      setTimeout(scheduleLetterPop, nextPop);
+    }
+    setTimeout(scheduleLetterPop, 1800);
+
+    // Wave across username letters every 8-12 seconds
+    function cascadeLetterWave() {
+      charLetters.forEach((charEl, idx) => {
+        setTimeout(() => {
+          popSingleLetter(charEl, false);
+        }, idx * 95);
+      });
+      const nextWave = Math.floor(Math.random() * 4000) + 8000;
+      setTimeout(cascadeLetterWave, nextWave);
+    }
+    setTimeout(cascadeLetterWave, 3500);
+
+    // Interactive Hover & Click on Username Letters
+    charLetters.forEach((charEl) => {
+      charEl.addEventListener('mouseenter', () => {
+        popSingleLetter(charEl, true);
+      });
+      charEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        popSingleLetter(charEl, true);
+        showToast(`Letter "${charEl.textContent}" popped!`);
+      });
+    });
+
+    bioPops.forEach((bp) => {
+      bp.addEventListener('mouseenter', () => {
+        bp.classList.add('is-popped');
+        playCyberSound('blip', 780);
+        setTimeout(() => bp.classList.remove('is-popped'), 600);
+      });
+    });
+
+    // -------------------------------------------------------------
+    // Live Kyiv Clock & Telemetry
+    // -------------------------------------------------------------
+    function updateLiveClock() {
+      const clockEl = document.getElementById('live-clock');
+      if (clockEl) {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('uk-UA', { timeZone: 'Europe/Kyiv', hour12: false });
+        clockEl.textContent = timeStr;
+      }
+    }
+    setInterval(updateLiveClock, 1000);
+    updateLiveClock();
+
+    // -------------------------------------------------------------
+    // Discord Playtime Stopwatch Counter
+    // -------------------------------------------------------------
+    let elapsedSeconds = 2 * 3600 + 44 * 60 + 19;
+    function formatElapsed(sec) {
+      const h = String(Math.floor(sec / 3600)).padStart(2, '0');
+      const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      return `${h}:${m}:${s} elapsed`;
+    }
+    setInterval(() => {
+      elapsedSeconds++;
+      const el = document.getElementById('activity-elapsed');
+      if (el) {
+        el.textContent = `${formatElapsed(elapsedSeconds)} • Active`;
+      }
+    }, 1000);
+
+    // -------------------------------------------------------------
+    // Click-to-Copy Actions
+    // -------------------------------------------------------------
+    const discordCardEl = document.getElementById('discord-card');
+    if (discordCardEl) {
+      discordCardEl.addEventListener('click', (e) => {
+        navigator.clipboard.writeText('patch').then(() => {
+          showToast('✓ Copied Discord: patch');
+          playCyberSound('blip', 880);
+        }).catch(() => {
+          showToast('Discord Tag: patch');
+        });
+      });
+    }
+
+    const badgeYoshi = document.getElementById('badge-yoshi');
+    if (badgeYoshi) {
+      badgeYoshi.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText('Yoshi').then(() => {
+          showToast('✓ Copied Alias: Yoshi');
+          playCyberSound('blip', 920);
+        });
+      });
+    }
 
     // -------------------------------------------------------------
     // Typing Title Animation
