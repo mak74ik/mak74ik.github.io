@@ -411,6 +411,7 @@
       will-change: transform;
       cursor: pointer;
       overflow: hidden;
+      touch-action: none;
     }
 
     .dvd-logo:hover {
@@ -419,7 +420,6 @@
         inset 0 -2px 2.5px rgba(0, 0, 0, 0.45),
         0 20px 48px rgba(0, 0, 0, 0.75),
         0 0 45px rgba(56, 189, 248, 0.4);
-      transform: scale(1.06);
     }
 
     .dvd-logo.broken {
@@ -428,6 +428,11 @@
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.9) !important;
       filter: contrast(1.3) brightness(0.9);
       cursor: grab;
+      touch-action: none;
+    }
+
+    .dvd-logo.broken.dragging {
+      cursor: grabbing !important;
     }
 
     .dvd-crack-svg {
@@ -459,52 +464,6 @@
       font-weight: 700;
       opacity: 0.9;
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-    }
-
-    .dvd-repair-prompt {
-      position: absolute;
-      bottom: 28px;
-      left: 50%;
-      transform: translateX(-50%) translateY(30px);
-      padding: 11px 24px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.04) 100%), rgba(10, 16, 32, 0.78);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 24px;
-      box-shadow: 
-        inset 0 1.5px 1.5px rgba(255, 255, 255, 0.5),
-        0 14px 35px rgba(0, 0, 0, 0.7),
-        0 0 25px rgba(56, 189, 248, 0.2);
-      color: #FFFFFF;
-      font-size: 0.82rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      font-family: var(--font-main);
-      cursor: pointer;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      z-index: 99995;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .dvd-repair-prompt.show {
-      opacity: 1;
-      visibility: visible;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    .dvd-repair-prompt:hover {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.08) 100%), rgba(14, 24, 46, 0.9);
-      border-color: rgba(255, 255, 255, 0.5);
-      transform: translateX(-50%) translateY(-2px) scale(1.05);
-      box-shadow: 
-        inset 0 1.5px 2px rgba(255, 255, 255, 0.7),
-        0 18px 45px rgba(0, 0, 0, 0.8),
-        0 0 35px rgba(56, 189, 248, 0.4);
     }
 
     .corner-hit-toast {
@@ -1885,13 +1844,80 @@
       <div id="toast-title" class="toast-title">🎯 CORNER HIT! 🎯</div>
       <div id="toast-sub" class="toast-sub">FIRST BLOOD • 1x STREAK</div>
     </div>
-    <button id="dvd-repair-btn" class="dvd-repair-prompt">🔧 Tap to repair DVD</button>
   </div>
 
   <!-- Oneko Cat Pet -->
   <div id="oneko" aria-hidden="true"></div>
 
   <script>
+    var sfxEnabled = true;
+    var audioCtx = null;
+
+    // Authentic Dota 2 / Unreal Tournament Announcer Audio Pool
+    var announcerFiles = {
+      firstblood: 'assets/sounds/firstblood.mp3',
+      doublekill: 'assets/sounds/doublekill.mp3',
+      triplekill: 'assets/sounds/triplekill.mp3',
+      ultrakill: 'assets/sounds/ultrakill.mp3',
+      rampage: 'assets/sounds/rampage.mp3',
+      unstoppable: 'assets/sounds/unstoppable.mp3',
+      wickedsick: 'assets/sounds/wickedsick.mp3',
+      monsterkill: 'assets/sounds/monsterkill.mp3',
+      godlike: 'assets/sounds/godlike.mp3',
+      holyshit: 'assets/sounds/holyshit.mp3'
+    };
+
+    var announcerBuffers = {};
+    var announcerAudioMap = {};
+    var rawAudioBuffers = {};
+
+    function decodeAnnouncerBuffer(k, ab) {
+      if (!audioCtx || announcerBuffers[k] || !ab) return;
+      try {
+        audioCtx.decodeAudioData(ab.slice(0), decoded => {
+          announcerBuffers[k] = decoded;
+        }, () => {});
+      } catch (e) {}
+    }
+
+    function preloadAnnouncerBuffers() {
+      if (!audioCtx) return;
+      Object.entries(rawAudioBuffers).forEach(([k, ab]) => {
+        decodeAnnouncerBuffer(k, ab);
+      });
+      Object.entries(announcerFiles).forEach(([k, file]) => {
+        if (!announcerBuffers[k] && !rawAudioBuffers[k]) {
+          fetch(file)
+            .then(res => res.arrayBuffer())
+            .then(ab => {
+              rawAudioBuffers[k] = ab;
+              decodeAnnouncerBuffer(k, ab);
+            })
+            .catch(() => {});
+        }
+      });
+    }
+
+    // Immediately start background fetching the MP3 ArrayBuffers
+    Object.entries(announcerFiles).forEach(([k, file]) => {
+      try {
+        const a = new Audio(file);
+        a.preload = 'auto';
+        announcerAudioMap[k] = a;
+      } catch (e) {}
+
+      fetch(file)
+        .then(res => {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.arrayBuffer();
+        })
+        .then(ab => {
+          rawAudioBuffers[k] = ab;
+          decodeAnnouncerBuffer(k, ab);
+        })
+        .catch(() => {});
+    });
+
     // -------------------------------------------------------------
     // Starfield Particle Canvas + Cursor Sparkles & Shockwaves
     // -------------------------------------------------------------
@@ -2015,10 +2041,19 @@
     const cardGlare = document.getElementById('card-glare');
 
     function enterBio() {
+      initAudio();
       revealScreen.classList.add('faded');
       profileCard.classList.add('active');
       startTitleTyping();
     }
+
+    ['pointerdown', 'mousedown', 'keydown', 'touchstart'].forEach(evt => {
+      window.addEventListener(evt, () => {
+        if (!audioCtx || audioCtx.state === 'suspended') {
+          initAudio();
+        }
+      }, { passive: true });
+    });
 
     if (window.location.href.includes('enter')) {
       enterBio();
@@ -2228,9 +2263,6 @@
     // -------------------------------------------------------------
     // Web Audio API Synthesizer (Retro-Futuristic Cyber SFX)
     // -------------------------------------------------------------
-    let sfxEnabled = true;
-    let audioCtx = null;
-
     function initAudio() {
       if (!audioCtx) {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -2238,6 +2270,9 @@
       }
       if (audioCtx && audioCtx.state === 'suspended') {
         audioCtx.resume();
+      }
+      if (typeof preloadAnnouncerBuffers === 'function') {
+        preloadAnnouncerBuffers();
       }
     }
 
@@ -2701,48 +2736,45 @@
     let targetCornerPoint = null;
     let dvdToastTimer = null;
 
-    // Ragdoll breaking physics state
+    // Ragdoll breaking & drag physics state
     let isDvdBroken = false;
     let dvdRotation = 0;
     let dvdRotVel = 0;
-
-    // Authentic Dota 2 / Unreal Tournament Announcer Audio Pool
-    const announcerAudioMap = {
-      firstblood: new Audio('assets/sounds/firstblood.mp3'),
-      doublekill: new Audio('assets/sounds/doublekill.mp3'),
-      triplekill: new Audio('assets/sounds/triplekill.mp3'),
-      ultrakill: new Audio('assets/sounds/ultrakill.mp3'),
-      rampage: new Audio('assets/sounds/rampage.mp3'),
-      unstoppable: new Audio('assets/sounds/unstoppable.mp3'),
-      wickedsick: new Audio('assets/sounds/wickedsick.mp3'),
-      monsterkill: new Audio('assets/sounds/monsterkill.mp3'),
-      godlike: new Audio('assets/sounds/godlike.mp3'),
-      holyshit: new Audio('assets/sounds/holyshit.mp3')
-    };
-
-    // Preload audio files so they trigger with zero latency
-    Object.values(announcerAudioMap).forEach(a => {
-      a.preload = 'auto';
-    });
-
-    let currentAnnouncerAudio = null;
+    let isDraggingDvd = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+    let lastDragX = 0;
+    let lastDragY = 0;
+    let lastDragTime = 0;
 
     function playAnnouncerAudio(soundKey) {
       if (!sfxEnabled) return;
       try {
-        if (currentAnnouncerAudio) {
-          currentAnnouncerAudio.pause();
-          currentAnnouncerAudio.currentTime = 0;
+        initAudio();
+        // Method 1: Web Audio API decoded buffer (immune to autoplay restrictions, zero latency)
+        if (audioCtx) {
+          if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+          }
+          const buf = announcerBuffers[soundKey];
+          if (buf) {
+            const src = audioCtx.createBufferSource();
+            const gain = audioCtx.createGain();
+            src.buffer = buf;
+            gain.gain.setValueAtTime(1.0, audioCtx.currentTime);
+            src.connect(gain);
+            gain.connect(audioCtx.destination);
+            src.start(0);
+            return;
+          }
         }
+        // Method 2: HTML5 Audio fallback
         const audio = announcerAudioMap[soundKey];
         if (audio) {
-          currentAnnouncerAudio = audio;
           audio.currentTime = 0;
           audio.volume = 1.0;
-          const playPromise = audio.play();
-          if (playPromise !== undefined) {
-            playPromise.catch(() => {});
-          }
+          const p = audio.play();
+          if (p) p.catch(() => {});
         }
       } catch (e) {}
     }
@@ -2873,48 +2905,70 @@
       const maxY = Math.max(20, window.innerHeight - dvdHeight);
 
       if (isDvdBroken) {
-        // Ragdoll Physics: gravity, velocity, floor/wall bounces, friction, rotational tumble
-        dvdVy += 0.82; // gravity pull
-        dvdX += dvdVx;
-        dvdY += dvdVy;
-        dvdRotation += dvdRotVel;
+        if (!isDraggingDvd) {
+          // Ragdoll Physics: gravity, velocity, floor/wall bounces, friction, rotational tumble
+          dvdVy += 0.82; // gravity pull
+          dvdVx *= 0.992; // air friction
+          dvdVy *= 0.992;
+          dvdX += dvdVx;
+          dvdY += dvdVy;
+          dvdRotation += dvdRotVel;
 
-        // Floor collision
-        if (dvdY >= maxY) {
-          dvdY = maxY;
-          if (Math.abs(dvdVy) > 1.2) {
-            dvdVy = -dvdVy * 0.42; // restitution
-            dvdVx *= 0.76;         // floor friction
-            dvdRotVel *= 0.65;     // angular friction
-            playCyberSound('glass_thud');
-          } else {
-            dvdVy = 0;
-            dvdVx *= 0.8;
-            dvdRotVel *= 0.7;
-            if (Math.abs(dvdVx) < 0.05) dvdVx = 0;
-            if (Math.abs(dvdRotVel) < 0.05) dvdRotVel = 0;
+          // Floor collision
+          if (dvdY >= maxY) {
+            dvdY = maxY;
+            if (Math.abs(dvdVy) > 1.2) {
+              dvdVy = -dvdVy * 0.45; // restitution
+              dvdVx *= 0.78;         // floor friction
+              dvdRotVel *= 0.65;     // angular friction
+              playCyberSound('glass_thud');
+
+              if (Math.abs(dvdVy) > 3) {
+                for (let i = 0; i < 4; i++) {
+                  cursorSparks.push({
+                    x: dvdX + 60,
+                    y: maxY + 20,
+                    vx: (Math.random() - 0.5) * 5,
+                    vy: -Math.random() * 4 - 1,
+                    size: 2,
+                    alpha: 0.9,
+                    decay: 0.04,
+                    color: '56, 189, 248'
+                  });
+                }
+              }
+            } else {
+              dvdVy = 0;
+              dvdVx *= 0.8;
+              dvdRotVel *= 0.7;
+              if (Math.abs(dvdVx) < 0.05) dvdVx = 0;
+              if (Math.abs(dvdRotVel) < 0.05) dvdRotVel = 0;
+            }
           }
-        }
 
-        // Ceiling collision
-        if (dvdY <= 0) {
-          dvdY = 0;
-          dvdVy = -dvdVy * 0.5;
-        }
+          // Ceiling collision
+          if (dvdY <= 0) {
+            dvdY = 0;
+            dvdVy = Math.abs(dvdVy) * 0.5;
+            playCyberSound('glass_thud');
+          }
 
-        // Wall collisions
-        if (dvdX <= 0) {
-          dvdX = 0;
-          dvdVx = -dvdVx * 0.55;
-          dvdRotVel = -dvdRotVel * 0.7;
-        } else if (dvdX >= maxX) {
-          dvdX = maxX;
-          dvdVx = -dvdVx * 0.55;
-          dvdRotVel = -dvdRotVel * 0.7;
-        }
+          // Wall collisions
+          if (dvdX <= 0) {
+            dvdX = 0;
+            dvdVx = Math.abs(dvdVx) * 0.55;
+            dvdRotVel = -dvdRotVel * 0.7;
+            playCyberSound('glass_thud');
+          } else if (dvdX >= maxX) {
+            dvdX = maxX;
+            dvdVx = -Math.abs(dvdVx) * 0.55;
+            dvdRotVel = -dvdRotVel * 0.7;
+            playCyberSound('glass_thud');
+          }
 
-        if (dvdLogo) {
-          dvdLogo.style.transform = `translate3d(${dvdX.toFixed(1)}px, ${dvdY.toFixed(1)}px, 0) rotate(${dvdRotation.toFixed(1)}deg)`;
+          if (dvdLogo) {
+            dvdLogo.style.transform = `translate3d(${dvdX.toFixed(1)}px, ${dvdY.toFixed(1)}px, 0) rotate(${dvdRotation.toFixed(1)}deg)`;
+          }
         }
 
         dvdAnimFrame = requestAnimationFrame(stepDvd);
@@ -3030,14 +3084,14 @@
         playCyberSound('glass_shatter');
 
         // Initial launch & tumble impulse
-        dvdVx = (Math.random() - 0.5) * 8;
-        dvdVy = -Math.random() * 5 - 4; // slight pop up before falling
-        dvdRotVel = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 9 + 6);
+        dvdVx = (Math.random() - 0.5) * 10;
+        dvdVy = -Math.random() * 6 - 4; // slight pop up before falling
+        dvdRotVel = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 12 + 8);
 
         // Explode glass shards into cursorSparks
-        for (let i = 0; i < 32; i++) {
+        for (let i = 0; i < 36; i++) {
           const angle = Math.random() * Math.PI * 2;
-          const spd = Math.random() * 7 + 2;
+          const spd = Math.random() * 8 + 2;
           cursorSparks.push({
             x: dvdX + 60,
             y: dvdY + 30,
@@ -3050,82 +3104,104 @@
           });
         }
 
-        showToast('💥 DVD IS BROKEN! RAGDOLL ACTIVATED');
-
-        setTimeout(() => {
-          if (isDvdBroken && dvdRepairBtn) {
-            dvdRepairBtn.classList.add('show');
-          }
-        }, 800);
-      } else {
-        // Kick broken DVD along the floor
-        dvdVy = -Math.random() * 7 - 3;
-        dvdVx = (Math.random() - 0.5) * 12;
-        dvdRotVel = (Math.random() - 0.5) * 22;
-        playCyberSound('glass_thud');
-
-        for (let i = 0; i < 10; i++) {
-          cursorSparks.push({
-            x: dvdX + 60,
-            y: dvdY + 30,
-            vx: (Math.random() - 0.5) * 6,
-            vy: -Math.random() * 5 - 1,
-            size: 2,
-            alpha: 1.0,
-            decay: 0.035,
-            color: '56, 189, 248'
-          });
-        }
+        showToast('💥 DVD SHATTERED!');
       }
     }
 
-    function repairDvd(e) {
-      if (e) {
-        e.stopPropagation();
-        e.preventDefault();
-      }
-      if (!isDvdBroken) return;
+    function onDvdPointerDown(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      initAudio();
 
-      isDvdBroken = false;
-      dvdRotation = 0;
+      if (!isDvdBroken) {
+        breakDvd(e);
+        return;
+      }
+
+      isDraggingDvd = true;
+      try {
+        dvdLogo.setPointerCapture(e.pointerId);
+      } catch (err) {}
+      dvdLogo.classList.add('dragging');
+
+      dragOffsetX = e.clientX - dvdX;
+      dragOffsetY = e.clientY - dvdY;
+      lastDragX = e.clientX;
+      lastDragY = e.clientY;
+      lastDragTime = performance.now();
+      dvdVx = 0;
+      dvdVy = 0;
       dvdRotVel = 0;
+    }
+
+    function onDvdPointerMove(e) {
+      if (!isDraggingDvd) return;
+      e.stopPropagation();
+      e.preventDefault();
+
+      const now = performance.now();
+      const dt = Math.max(1, now - lastDragTime);
+
+      const newX = e.clientX - dragOffsetX;
+      const newY = e.clientY - dragOffsetY;
+
+      // Track throw velocity (normalized to 60fps frame delta)
+      const vx = ((e.clientX - lastDragX) / dt) * 16.67;
+      const vy = ((e.clientY - lastDragY) / dt) * 16.67;
+
+      dvdVx = dvdVx * 0.35 + vx * 0.65;
+      dvdVy = dvdVy * 0.35 + vy * 0.65;
+
+      lastDragX = e.clientX;
+      lastDragY = e.clientY;
+      lastDragTime = now;
+
+      // Dynamic tilt based on horizontal drag
+      dvdRotation += (vx * 0.6);
+
+      const maxX = Math.max(20, window.innerWidth - dvdWidth);
+      const maxY = Math.max(20, window.innerHeight - dvdHeight);
+      dvdX = Math.max(0, Math.min(maxX, newX));
+      dvdY = Math.max(0, Math.min(maxY, newY));
+
       if (dvdLogo) {
-        dvdLogo.classList.remove('broken');
-        dvdLogo.style.transform = `translate3d(${dvdX.toFixed(1)}px, ${dvdY.toFixed(1)}px, 0)`;
-      }
-      if (dvdRepairBtn) {
-        dvdRepairBtn.classList.remove('show');
+        dvdLogo.style.transform = `translate3d(${dvdX.toFixed(1)}px, ${dvdY.toFixed(1)}px, 0) rotate(${dvdRotation.toFixed(1)}deg)`;
       }
 
-      playCyberSound('glass_repair');
-      showToast('✨ DVD REPAIRED & RESTORED!');
-
-      for (let i = 0; i < 28; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const spd = Math.random() * 6 + 1;
+      if (Math.hypot(vx, vy) > 8 && Math.random() < 0.4) {
         cursorSparks.push({
           x: dvdX + 60,
           y: dvdY + 30,
-          vx: Math.cos(angle) * spd,
-          vy: Math.sin(angle) * spd,
-          size: Math.random() * 3 + 1,
-          alpha: 1.0,
-          decay: 0.02,
+          vx: (Math.random() - 0.5) * 4,
+          vy: (Math.random() - 0.5) * 4,
+          size: 2,
+          alpha: 0.8,
+          decay: 0.04,
           color: '56, 189, 248'
         });
       }
+    }
 
-      wallBouncesUntilCorner = Math.floor(Math.random() * 4) + 6;
-      targetCornerPoint = null;
-      const repairAngle = Math.random() * Math.PI * 2;
-      dvdVx = Math.cos(repairAngle) * dvdSpeed;
-      dvdVy = Math.sin(repairAngle) * dvdSpeed;
-      if (Math.abs(dvdVx) < 2) dvdVx = 3.8 * (dvdVx >= 0 ? 1 : -1);
-      if (Math.abs(dvdVy) < 2) dvdVy = 3.4 * (dvdVy >= 0 ? 1 : -1);
+    function onDvdPointerUp(e) {
+      if (!isDraggingDvd) return;
+      isDraggingDvd = false;
+      try {
+        dvdLogo.releasePointerCapture(e.pointerId);
+      } catch (err) {}
+      dvdLogo.classList.remove('dragging');
+
+      // Throw momentum
+      dvdVx = Math.max(-28, Math.min(28, dvdVx * 1.15));
+      dvdVy = Math.max(-28, Math.min(28, dvdVy * 1.15));
+      dvdRotVel = dvdVx * 1.8;
+
+      if (Math.hypot(dvdVx, dvdVy) > 6) {
+        playCyberSound('blip', 320);
+      }
     }
 
     function startDvdScreensaver() {
-      if (dvdActive) return;
+      if (dvdActive || isDvdBroken) return; // NEVER REAPPEAR ONCE BROKEN!
       dvdActive = true;
       if (dvdOverlay) dvdOverlay.classList.add('active');
       dvdX = Math.floor(window.innerWidth / 2) - 60;
@@ -3146,49 +3222,36 @@
       if (window.location.href.includes('dvd')) return;
       dvdActive = false;
       cornerStreak = 0; // reset kill streak on active exit
-      isDvdBroken = false;
-      dvdRotation = 0;
-      dvdRotVel = 0;
-      wallBouncesUntilCorner = Math.floor(Math.random() * 4) + 6;
-      targetCornerPoint = null;
-      if (dvdLogo) {
-        dvdLogo.classList.remove('broken');
-        dvdLogo.style.transform = `translate3d(${dvdX.toFixed(1)}px, ${dvdY.toFixed(1)}px, 0)`;
-      }
-      if (dvdRepairBtn) dvdRepairBtn.classList.remove('show');
+      // NOTE: isDvdBroken remains true if broken! DVD will never reappear!
       if (dvdOverlay) dvdOverlay.classList.remove('active');
       cancelAnimationFrame(dvdAnimFrame);
     }
 
-    function resetIdleTimer(e) {
-      if (dvdActive) {
-        // While screensaver is running, don't close on mousemove so user can aim and click!
-        if (e && e.type === 'mousemove') return;
-        if (e && e.target && (e.target.closest('#dvd-logo') || e.target.closest('#dvd-repair-btn'))) return;
-        stopDvdScreensaver();
-      }
-
+    function resetIdleTimer() {
       clearTimeout(idleTimer);
+      if (isDvdBroken) return; // Broken DVD never appears again!
       idleTimer = setTimeout(() => {
-        if (profileCard && profileCard.classList.contains('active')) {
+        if (profileCard && profileCard.classList.contains('active') && !isDvdBroken) {
           startDvdScreensaver();
         }
       }, IDLE_LIMIT);
     }
 
     if (dvdLogo) {
-      dvdLogo.addEventListener('click', breakDvd);
+      dvdLogo.addEventListener('pointerdown', onDvdPointerDown);
+      dvdLogo.addEventListener('pointermove', onDvdPointerMove);
+      dvdLogo.addEventListener('pointerup', onDvdPointerUp);
+      dvdLogo.addEventListener('pointercancel', onDvdPointerUp);
     }
-    if (dvdRepairBtn) {
-      dvdRepairBtn.addEventListener('click', repairDvd);
-    }
+
     if (dvdOverlay) {
-      dvdOverlay.addEventListener('click', (e) => {
-        if (e.target === dvdOverlay) {
-          stopDvdScreensaver();
-        }
+      dvdOverlay.addEventListener('pointerdown', (e) => {
+        // Exit screensaver ONLY when tapping/clicking on the screen outside the DVD logo
+        if (e.target.closest('#dvd-logo')) return;
+        stopDvdScreensaver();
       });
     }
+
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && dvdActive) {
         stopDvdScreensaver();
