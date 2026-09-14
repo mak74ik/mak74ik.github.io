@@ -293,43 +293,137 @@
       text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
     }
 
-    /* Dynamic Letters Pop Engine */
+    /* Dynamic Letters Pop Engine - Silky Smooth Rubber-Band Spring */
     .char-letter {
       display: inline-block;
-      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                  color 0.2s ease, 
-                  text-shadow 0.2s ease;
-      will-change: transform, color, text-shadow;
+      transition: transform 0.42s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                  color 0.3s ease, 
+                  text-shadow 0.3s ease;
+      will-change: transform;
       cursor: pointer;
       position: relative;
     }
 
     .char-letter.is-big {
-      transform: scale(1.48) translateY(-4px) !important;
+      transform: scale(1.36) translateY(-5px) !important;
       color: #38bdf8 !important;
-      text-shadow: 0 0 18px rgba(56, 189, 248, 0.95), 0 0 35px rgba(56, 189, 248, 0.6) !important;
-      font-weight: 800 !important;
+      text-shadow: 0 0 16px rgba(56, 189, 248, 0.9), 0 0 32px rgba(56, 189, 248, 0.5) !important;
     }
 
     .char-letter.is-huge {
-      transform: scale(1.75) translateY(-7px) rotate(-6deg) !important;
+      transform: scale(1.58) translateY(-8px) !important;
       color: #FFFFFF !important;
-      text-shadow: 0 0 24px #38bdf8, 0 0 50px rgba(56, 189, 248, 0.9) !important;
+      text-shadow: 0 0 22px #38bdf8, 0 0 45px rgba(56, 189, 248, 0.9) !important;
     }
 
     /* Dynamic Pop for Bio elements */
     .bio-pop {
       display: inline-block;
-      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.22s ease, text-shadow 0.22s ease;
+      transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.28s ease, text-shadow 0.28s ease;
       will-change: transform;
       cursor: pointer;
     }
 
     .bio-pop.is-popped {
-      transform: scale(1.24) translateY(-2px);
+      transform: scale(1.2) translateY(-3px);
       color: #38bdf8 !important;
       text-shadow: 0 0 14px rgba(56, 189, 248, 0.85);
+    }
+
+    /* Oneko Cat Pet */
+    #oneko {
+      width: 32px;
+      height: 32px;
+      position: fixed;
+      pointer-events: none;
+      background-image: url('assets/oneko.gif');
+      image-rendering: pixelated;
+      z-index: 99999;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+      transition: opacity 0.3s ease;
+    }
+
+    /* Meme DVD Screensaver Overlay */
+    .dvd-screensaver {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 99990;
+      pointer-events: none;
+      background: rgba(3, 6, 14, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease, visibility 0.5s;
+    }
+
+    .dvd-screensaver.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .dvd-logo {
+      position: absolute;
+      width: 120px;
+      height: 60px;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      font-family: var(--font-main);
+      box-shadow: 0 0 30px currentColor, inset 0 0 18px currentColor;
+      border: 2px solid currentColor;
+      color: #38bdf8;
+      user-select: none;
+      transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      will-change: left, top, color;
+    }
+
+    .dvd-text {
+      font-size: 1.45rem;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .dvd-sub {
+      font-size: 0.62rem;
+      letter-spacing: 0.28em;
       font-weight: 700;
+      opacity: 0.9;
+    }
+
+    .corner-hit-toast {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.6);
+      padding: 16px 32px;
+      background: rgba(10, 16, 32, 0.95);
+      border: 2px solid #38bdf8;
+      border-radius: 24px;
+      color: #FFFFFF;
+      font-size: 1.35rem;
+      font-weight: 800;
+      box-shadow: 0 0 50px rgba(56, 189, 248, 0.85);
+      opacity: 0;
+      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: none;
+      text-align: center;
+      letter-spacing: 0.05em;
+    }
+
+    .corner-hit-toast.show {
+      transform: translate(-50%, -50%) scale(1.15);
+      opacity: 1;
     }
 
     .badges-row {
@@ -1325,11 +1419,6 @@
       <!-- Cyber Telemetry Status Bar -->
       <div class="telemetry-bar">
         <div class="telemetry-item">
-          <svg class="telemetry-icon" viewBox="0 0 24 24"><path d="M12 0c-4.198 0-8 3.403-8 7.602 0 4.198 3.469 9.21 8 16.398 4.531-7.188 8-12.2 8-16.398 0-4.199-3.801-7.602-8-7.602zm0 11c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"></path></svg>
-          <span>Kyiv, UA</span>
-        </div>
-        <span class="telemetry-sep">•</span>
-        <div class="telemetry-item">
           <span class="telemetry-dot live-pulse"></span>
           <span id="live-clock">12:55:00</span>
         </div>
@@ -1582,6 +1671,18 @@
     </div>
   </aside>
 
+  <!-- Meme DVD Screensaver Overlay -->
+  <div id="dvd-screensaver" class="dvd-screensaver">
+    <div id="dvd-logo" class="dvd-logo">
+      <div class="dvd-text">DVD</div>
+      <div class="dvd-sub">VIDEO</div>
+    </div>
+    <div id="corner-hit-toast" class="corner-hit-toast">🎯 CORNER HIT! 🎯</div>
+  </div>
+
+  <!-- Oneko Cat Pet -->
+  <div id="oneko" aria-hidden="true"></div>
+
   <script>
     // -------------------------------------------------------------
     // Starfield Particle Canvas + Cursor Sparkles & Shockwaves
@@ -1711,7 +1812,7 @@
       startTitleTyping();
     }
 
-    if (window.location.search.includes('enter') || window.location.hash === '#enter') {
+    if (window.location.href.includes('enter')) {
       enterBio();
     } else {
       revealScreen.addEventListener('click', enterBio);
@@ -1725,17 +1826,17 @@
     let velocityX = 0, velocityY = 0;
     let glareX = 50, glareY = 50;
 
-    // Critically Damped Spring constants from Mac Duo
-    const springDamping = 0.84;
-    const springStiffness = 0.075;
+    // Silky Smooth Damped Spring constants from Mac Duo
+    const springDamping = 0.88;
+    const springStiffness = 0.045;
 
     window.addEventListener('mousemove', (e) => {
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
 
-      // Calculate tilt angles based on cursor offset (-9 to +9 deg)
-      targetTiltX = ((e.clientY - centerY) / centerY) * -9;
-      targetTiltY = ((e.clientX - centerX) / centerX) * 11;
+      // Softened tilt angles based on cursor offset (-3.2 to +3.8 deg)
+      targetTiltX = ((e.clientY - centerY) / centerY) * -3.2;
+      targetTiltY = ((e.clientX - centerX) / centerX) * 3.8;
 
       // Specular glare coords
       const cardRect = profileCard.getBoundingClientRect();
@@ -2004,63 +2105,65 @@
 
     function popSingleLetter(el, isHuge = false) {
       if (!el) return;
-      const originalChar = el.getAttribute('data-letter') || el.textContent;
       el.classList.add(isHuge ? 'is-huge' : 'is-big');
-      
-      // Capitalize during pop for extra glitch aesthetic
-      if (Math.random() > 0.3) {
-        el.textContent = originalChar.toUpperCase();
-      }
-      playCyberSound('blip', 650 + Math.random() * 450);
+      playCyberSound('blip', 650 + Math.random() * 350);
 
       setTimeout(() => {
         el.classList.remove('is-huge', 'is-big');
-        el.textContent = originalChar;
-      }, isHuge ? 650 : 450);
+      }, isHuge ? 480 : 420);
+    }
+
+    function popMultipleLetters(count = null) {
+      if (!charLetters || charLetters.length === 0) return;
+      
+      // Select 2 to 4 letters at once
+      const numToPop = count !== null ? count : Math.floor(Math.random() * 3) + 2;
+      const shuffled = [...charLetters].sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, Math.min(numToPop, charLetters.length));
+
+      selected.forEach((letterEl, i) => {
+        setTimeout(() => {
+          popSingleLetter(letterEl, Math.random() > 0.7);
+        }, i * 25);
+      });
     }
 
     function scheduleLetterPop() {
-      if (charLetters.length > 0) {
-        const count = Math.random() > 0.6 ? 2 : 1;
-        for (let i = 0; i < count; i++) {
-          const randomLetter = charLetters[Math.floor(Math.random() * charLetters.length)];
-          popSingleLetter(randomLetter, Math.random() > 0.8);
-        }
-      }
+      popMultipleLetters();
 
       // Also pop random bio word occasionally
-      if (Math.random() > 0.5 && bioPops.length > 0) {
+      if (Math.random() > 0.45 && bioPops.length > 0) {
         const randomBio = bioPops[Math.floor(Math.random() * bioPops.length)];
         randomBio.classList.add('is-popped');
-        setTimeout(() => randomBio.classList.remove('is-popped'), 600);
+        setTimeout(() => randomBio.classList.remove('is-popped'), 550);
       }
 
-      const nextPop = Math.floor(Math.random() * 1500) + 1500;
+      const nextPop = Math.floor(Math.random() * 1400) + 1400;
       setTimeout(scheduleLetterPop, nextPop);
     }
-    setTimeout(scheduleLetterPop, 1800);
+    setTimeout(scheduleLetterPop, 1500);
 
-    // Wave across username letters every 8-12 seconds
+    // Wave across username letters every 9-14 seconds
     function cascadeLetterWave() {
       charLetters.forEach((charEl, idx) => {
         setTimeout(() => {
           popSingleLetter(charEl, false);
-        }, idx * 95);
+        }, idx * 75);
       });
-      const nextWave = Math.floor(Math.random() * 4000) + 8000;
+      const nextWave = Math.floor(Math.random() * 5000) + 9000;
       setTimeout(cascadeLetterWave, nextWave);
     }
-    setTimeout(cascadeLetterWave, 3500);
+    setTimeout(cascadeLetterWave, 4000);
 
     // Interactive Hover & Click on Username Letters
     charLetters.forEach((charEl) => {
       charEl.addEventListener('mouseenter', () => {
-        popSingleLetter(charEl, true);
+        popMultipleLetters(2);
       });
       charEl.addEventListener('click', (e) => {
         e.stopPropagation();
-        popSingleLetter(charEl, true);
-        showToast(`Letter "${charEl.textContent}" popped!`);
+        popMultipleLetters(charLetters.length);
+        showToast(`Letters jumped!`);
       });
     });
 
@@ -2311,6 +2414,301 @@
     fetchDiscordPresence();
     connectLanyardWs();
     setInterval(fetchDiscordPresence, 30000);
+
+    // -------------------------------------------------------------
+    // Meme DVD Screensaver Engine (Hits the exact corner every time!)
+    // -------------------------------------------------------------
+    const dvdOverlay = document.getElementById('dvd-screensaver');
+    const dvdLogo = document.getElementById('dvd-logo');
+    const cornerToast = document.getElementById('corner-hit-toast');
+
+    let dvdActive = false;
+    let dvdX = 100, dvdY = 100;
+    let dvdSpeed = 5.2;
+    let dvdVx = 4.5, dvdVy = 3.8;
+    const dvdWidth = 120, dvdHeight = 60;
+    let dvdColors = ['#38bdf8', '#ec4899', '#22c55e', '#a855f7', '#f59e0b', '#06b6d4', '#e11d48', '#8b5cf6'];
+    let dvdColorIdx = 0;
+    let dvdAnimFrame = null;
+    let idleTimer = null;
+    const IDLE_LIMIT = 7000; // 7 seconds of inactivity
+
+    const memeCornerPhrases = [
+      "🎯 CORNER HIT! 🎯",
+      "💥 100% SKILL (NO LUCK)",
+      "🔥 IMPOSSIBLE ANGLE!",
+      "⚡ FRAME PERFECT HIT!",
+      "👑 ABSOLUTE CINEMA"
+    ];
+
+    function pickCornerTrajectory() {
+      const maxX = Math.max(10, window.innerWidth - dvdWidth);
+      const maxY = Math.max(10, window.innerHeight - dvdHeight);
+      const corners = [
+        { x: 0, y: 0 },
+        { x: maxX, y: 0 },
+        { x: 0, y: maxY },
+        { x: maxX, y: maxY }
+      ];
+
+      // Filter out corners that are too close
+      const candidates = corners.filter(c => Math.hypot(c.x - dvdX, c.y - dvdY) > 80);
+      const target = (candidates.length > 0 ? candidates : corners)[Math.floor(Math.random() * (candidates.length || corners.length))];
+      
+      const dx = target.x - dvdX;
+      const dy = target.y - dvdY;
+      const dist = Math.hypot(dx, dy);
+
+      const steps = Math.max(65, Math.floor(dist / dvdSpeed));
+      dvdVx = dx / steps;
+      dvdVy = dy / steps;
+      return { target, steps };
+    }
+
+    let targetCornerGoal = null;
+
+    function triggerCornerCelebration() {
+      dvdColorIdx = (dvdColorIdx + 1) % dvdColors.length;
+      const newColor = dvdColors[dvdColorIdx];
+      if (dvdLogo) {
+        dvdLogo.style.color = newColor;
+        dvdLogo.style.boxShadow = `0 0 35px ${newColor}, inset 0 0 18px ${newColor}`;
+      }
+
+      if (cornerToast) {
+        const text = memeCornerPhrases[Math.floor(Math.random() * memeCornerPhrases.length)];
+        cornerToast.textContent = text;
+        cornerToast.style.borderColor = newColor;
+        cornerToast.style.boxShadow = `0 0 50px ${newColor}`;
+        cornerToast.classList.add('show');
+        setTimeout(() => {
+          cornerToast.classList.remove('show');
+        }, 1300);
+      }
+
+      playCyberSound('blip', 980);
+      setTimeout(() => playCyberSound('blip', 1320), 80);
+      setTimeout(() => playCyberSound('blip', 1760), 160);
+    }
+
+    function stepDvd() {
+      if (!dvdActive) return;
+
+      const maxX = Math.max(10, window.innerWidth - dvdWidth);
+      const maxY = Math.max(10, window.innerHeight - dvdHeight);
+
+      if (!targetCornerGoal) {
+        targetCornerGoal = pickCornerTrajectory();
+      }
+
+      dvdX += dvdVx;
+      dvdY += dvdVy;
+
+      // Check if reached corner within threshold or hit screen boundary
+      const distToTarget = Math.hypot(dvdX - targetCornerGoal.target.x, dvdY - targetCornerGoal.target.y);
+      const reachedTarget = distToTarget <= Math.max(Math.abs(dvdVx), Math.abs(dvdVy)) * 1.5;
+      const boundaryCorner = (dvdX <= 0 && dvdY <= 0) || 
+                             (dvdX >= maxX && dvdY <= 0) || 
+                             (dvdX <= 0 && dvdY >= maxY) || 
+                             (dvdX >= maxX && dvdY >= maxY);
+
+      if (reachedTarget || boundaryCorner) {
+        // Precise pixel-perfect corner snap
+        dvdX = Math.max(0, Math.min(maxX, targetCornerGoal.target.x));
+        dvdY = Math.max(0, Math.min(maxY, targetCornerGoal.target.y));
+
+        triggerCornerCelebration();
+        targetCornerGoal = pickCornerTrajectory();
+      }
+
+      if (dvdLogo) {
+        dvdLogo.style.transform = `translate3d(${dvdX.toFixed(1)}px, ${dvdY.toFixed(1)}px, 0)`;
+      }
+
+      dvdAnimFrame = requestAnimationFrame(stepDvd);
+    }
+
+    function startDvdScreensaver() {
+      if (dvdActive) return;
+      dvdActive = true;
+      if (dvdOverlay) dvdOverlay.classList.add('active');
+      dvdX = Math.floor(window.innerWidth / 2) - 60;
+      dvdY = Math.floor(window.innerHeight / 2) - 30;
+      targetCornerGoal = pickCornerTrajectory();
+      cancelAnimationFrame(dvdAnimFrame);
+      dvdAnimFrame = requestAnimationFrame(stepDvd);
+    }
+
+    function stopDvdScreensaver() {
+      if (!dvdActive) return;
+      if (window.location.href.includes('dvd')) return;
+      dvdActive = false;
+      if (dvdOverlay) dvdOverlay.classList.remove('active');
+      cancelAnimationFrame(dvdAnimFrame);
+    }
+
+    function resetIdleTimer() {
+      stopDvdScreensaver();
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        if (profileCard && profileCard.classList.contains('active')) {
+          startDvdScreensaver();
+        }
+      }, IDLE_LIMIT);
+    }
+
+    ['mousemove', 'mousedown', 'keydown', 'touchstart', 'wheel', 'scroll'].forEach(evt => {
+      window.addEventListener(evt, resetIdleTimer, { passive: true });
+    });
+    if (dvdOverlay) {
+      dvdOverlay.addEventListener('click', stopDvdScreensaver);
+    }
+    resetIdleTimer();
+    if (window.location.href.includes('dvd')) {
+      setTimeout(startDvdScreensaver, 100);
+    }
+
+    // -------------------------------------------------------------
+    // Classic Oneko Cat Pet Engine (Chases mouse cursor)
+    // -------------------------------------------------------------
+    (function initOneko() {
+      const nekoEl = document.getElementById('oneko');
+      if (!nekoEl) return;
+
+      let nekoX = 32;
+      let nekoY = 32;
+      let mouseX = 0;
+      let mouseY = 0;
+      let frameCount = 0;
+      let idleTime = 0;
+      let idleAnimation = null;
+      let idleAnimationFrame = 0;
+      const nekoSpeed = 10;
+
+      const spriteSets = {
+        idle: [[-3, -3]],
+        alert: [[-7, -3]],
+        scratchSelf: [[-5, 0], [-6, 0], [-7, 0]],
+        scratchWallN: [[0, 0], [0, -1]],
+        scratchWallS: [[-7, -1], [-6, -2]],
+        scratchWallE: [[2, -2], [2, -3]],
+        scratchWallW: [[-4, 0], [-4, -1]],
+        tired: [[-3, -2]],
+        sleeping: [[-2, 0], [-2, -1]],
+        N: [[-1, -2], [-1, -3]],
+        NE: [[0, -2], [0, -3]],
+        E: [[-3, 0], [-3, -1]],
+        SE: [[-5, -1], [-5, -2]],
+        S: [[-6, -3], [-7, -2]],
+        SW: [[-5, -3], [-6, -1]],
+        W: [[-4, -2], [-4, -3]],
+        NW: [[-1, 0], [-1, -1]],
+      };
+
+      function setSprite(name, frame) {
+        const sprite = spriteSets[name][frame % spriteSets[name].length];
+        nekoEl.style.backgroundPosition = `${sprite[0] * 32}px ${sprite[1] * 32}px`;
+      }
+
+      function resetIdle() {
+        idleAnimation = null;
+        idleAnimationFrame = 0;
+      }
+
+      window.addEventListener('mousemove', (event) => {
+        mouseX = event.clientX;
+        mouseY = event.clientY;
+      });
+
+      // Initial position near bottom of card
+      nekoX = Math.max(32, Math.floor(window.innerWidth / 2 - 200));
+      nekoY = Math.max(32, Math.floor(window.innerHeight / 2 + 120));
+      mouseX = nekoX;
+      mouseY = nekoY;
+      nekoEl.style.left = `${nekoX}px`;
+      nekoEl.style.top = `${nekoY}px`;
+      setSprite('idle', 0);
+
+      function updateNeko() {
+        frameCount++;
+        const diffX = nekoX - mouseX;
+        const diffY = nekoY - mouseY;
+        const distance = Math.sqrt(diffX ** 2 + diffY ** 2);
+
+        if (distance < nekoSpeed || distance < 38) {
+          // Idle behavior
+          idleTime++;
+
+          if (idleTime > 10 && Math.floor(Math.random() * 200) === 0 && idleAnimation == null) {
+            idleAnimation = ['scratchSelf', 'tired'][Math.floor(Math.random() * 2)];
+          }
+
+          switch (idleAnimation) {
+            case 'sleeping':
+              if (idleAnimationFrame < 8) {
+                setSprite('tired', 0);
+                break;
+              }
+              setSprite('sleeping', Math.floor(idleAnimationFrame / 4));
+              if (idleAnimationFrame > 192) {
+                resetIdle();
+              }
+              break;
+            case 'scratchSelf':
+              setSprite('scratchSelf', idleAnimationFrame);
+              if (idleAnimationFrame > 9) {
+                resetIdle();
+              }
+              break;
+            case 'tired':
+              setSprite('tired', 0);
+              if (idleAnimationFrame > 8) {
+                resetIdle();
+              }
+              break;
+            default:
+              setSprite('idle', 0);
+              nekoEl.style.left = `${nekoX}px`;
+              nekoEl.style.top = `${nekoY}px`;
+              return;
+          }
+          idleAnimationFrame++;
+          nekoEl.style.left = `${nekoX}px`;
+          nekoEl.style.top = `${nekoY}px`;
+          return;
+        }
+
+        idleAnimation = null;
+        idleAnimationFrame = 0;
+
+        if (idleTime > 1) {
+          setSprite('alert', 0);
+          idleTime = Math.min(idleTime, 7);
+          idleTime--;
+          nekoEl.style.left = `${nekoX}px`;
+          nekoEl.style.top = `${nekoY}px`;
+          return;
+        }
+
+        let direction = '';
+        direction += diffY / distance > 0.5 ? 'N' : '';
+        direction += diffY / distance < -0.5 ? 'S' : '';
+        direction += diffX / distance > 0.5 ? 'W' : '';
+        direction += diffX / distance < -0.5 ? 'E' : '';
+        setSprite(direction || 'idle', frameCount);
+
+        nekoX -= (diffX / distance) * nekoSpeed;
+        nekoY -= (diffY / distance) * nekoSpeed;
+
+        nekoX = Math.min(Math.max(16, nekoX), window.innerWidth - 16);
+        nekoY = Math.min(Math.max(16, nekoY), window.innerHeight - 16);
+
+        nekoEl.style.left = `${nekoX}px`;
+        nekoEl.style.top = `${nekoY}px`;
+      }
+
+      setInterval(updateNeko, 100);
+    })();
   </script>
 </body>
 </html>
