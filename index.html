@@ -38,12 +38,12 @@
       --font-main: 'Unbounded', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
       --theme-color: #0ea5e9;
-      --accent-color: #38bdf8;        /* Vivid Ice / Sky Blue */
+      --accent-color: #38bdf8;        /* Vivid Sky Blue */
       --accent-hover: #0284c7;
       --accent-glow: rgba(56, 189, 248, 0.35);
       --accent-glow-strong: rgba(56, 189, 248, 0.6);
       --text-main: #FFFFFF;
-      --text-muted: #94A3B8;          /* Slate Cool Gray */
+      --text-muted: #94A3B8;          /* Slate Gray */
       --card-bg: rgba(10, 15, 26, 0.68);
       --card-border: rgba(56, 189, 248, 0.22);
       --card-blur: 28px;
@@ -68,7 +68,7 @@
       user-select: none;
     }
 
-    /* Ambient Background Canvas & Glow Orbs (Deep Blue & Cyan) */
+    /* Ambient Background Canvas & Glow Orbs */
     #bg-canvas {
       position: fixed;
       top: 0;
@@ -184,7 +184,7 @@
       }
     }
 
-    /* Main Container & Profile Card */
+    /* Main Container & 3D Perspective Stage */
     .main-wrapper {
       position: relative;
       z-index: 10;
@@ -194,10 +194,14 @@
       align-items: center;
       justify-content: center;
       padding: 40px 16px;
-      transition: padding 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+      perspective: 1200px; /* Mac Duo 3D Depth stage */
     }
 
+    /* =========================================================
+       Mac Duo 3D DEPTH CARD
+       ========================================================= */
     .profile-card {
+      position: relative;
       width: 100%;
       max-width: 580px;
       background: var(--card-bg);
@@ -211,22 +215,31 @@
         0 0 35px rgba(56, 189, 248, 0.08);
       opacity: 0;
       transform: translateY(30px);
+      transform-style: preserve-3d;
+      will-change: transform, box-shadow;
       transition: 
         opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-        transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
         border-color 0.3s ease;
-      will-change: transform;
+      overflow: hidden;
     }
 
     .profile-card.active {
       opacity: 1;
-      transform: translateY(0);
     }
 
-    /* SHIFT LEFT WHEN DOCK IS OPEN */
-    body.dock-open .profile-card.active {
-      transform: translateX(-160px);
-      border-color: rgba(56, 189, 248, 0.35);
+    /* Mac Duo Specular Glare / Depth Lighting Overlay */
+    .card-glare {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      border-radius: inherit;
+      z-index: 20;
+      opacity: 0.6;
+      background: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.15) 0%, transparent 65%);
+      transition: opacity 0.3s ease;
     }
 
     /* Card Top Header: Avatar + Nick + Badges */
@@ -316,7 +329,7 @@
       fill: var(--accent-color);
     }
 
-    /* Gradient Divider (Cyan/Blue Glow) */
+    /* Gradient Divider */
     .divider {
       height: 1px;
       width: 100%;
@@ -324,7 +337,7 @@
       margin: 18px 0;
     }
 
-    /* Cross Symbol (White with soft cyan/blue glow) */
+    /* Cross Symbol */
     .cross-symbol {
       text-align: center;
       font-size: 1.8rem;
@@ -525,10 +538,6 @@
 
     /* =========================================================
        FLY-OUT PROJECTS & LINKS DRAWER (RIGHT PANEL)
-       Fixing the clipping issue:
-       - Generous width and internal padding
-       - Proper z-indexing
-       - Safe overflow handling so scaled items NEVER clip
        ========================================================= */
     .projects-drawer {
       position: fixed;
@@ -550,7 +559,7 @@
       flex-direction: column;
       padding: 30px 24px;
       overflow-y: auto;
-      overflow-x: visible; /* Prevent clipping on zoom */
+      overflow-x: visible;
     }
 
     body.dock-open .projects-drawer {
@@ -635,9 +644,7 @@
       background: linear-gradient(90deg, rgba(56, 189, 248, 0.25), transparent);
     }
 
-    /* =========================================================
-       macOS DOCK ITEMS (Fixed: No Clipping, Smooth Magnification)
-       ========================================================= */
+    /* macOS Dock Items */
     .macos-dock {
       display: flex;
       flex-direction: column;
@@ -765,16 +772,7 @@
     }
 
     /* Responsive */
-    @media (max-width: 1100px) {
-      body.dock-open .profile-card.active {
-        transform: translateX(-80px);
-      }
-    }
-
     @media (max-width: 860px) {
-      body.dock-open .profile-card.active {
-        transform: translateY(0);
-      }
       :root {
         --drawer-width: 320px;
       }
@@ -808,10 +806,10 @@
 </head>
 <body>
 
-  <!-- Animated Stars Canvas (White/Blue Stars) -->
+  <!-- Animated Stars Canvas -->
   <canvas id="bg-canvas"></canvas>
 
-  <!-- Ambient Glow Orbs (Deep Blue & Cyan) -->
+  <!-- Ambient Glow Orbs -->
   <div class="ambient-glow glow-1"></div>
   <div class="ambient-glow glow-2"></div>
 
@@ -836,11 +834,14 @@
   <div id="drawer-backdrop" class="drawer-backdrop"></div>
 
   <!-- =========================================================
-       MAIN PROFILE CARD
+       MAIN PROFILE CARD (WITH MAC DUO 3D DEPTH PERSPECTIVE)
        ========================================================= -->
   <div class="main-wrapper">
     <div id="profile-card" class="profile-card">
       
+      <!-- Mac Duo Dynamic Glare Layer -->
+      <div id="card-glare" class="card-glare"></div>
+
       <!-- Card Top: Avatar, Nickname, Badges -->
       <div class="card-top">
         <div class="avatar-wrapper">
@@ -881,7 +882,11 @@
 ▿ Sex: )))
 ▿ ꜱᴋɪʟʟ: low
 
-<div class="spec-title">Valve Steam Deck OLED 512GB</div>
+<div class="spec-title">MacBook Air 13" M2</div>
+▿ Apple M2 (8-core CPU / 8-core GPU)
+▿ 8GB Unified Memory
+▿ 256GB SSD • Liquid Retina
+
 <div class="spec-title">Laptop Specs</div>
 ▿ 3TB SSD m2 storage
 ▿ 16gb ddr5 5200
@@ -1068,7 +1073,7 @@
 
   <script>
     // -------------------------------------------------------------
-    // Starfield Particle Canvas (Zero battery drain, elegant drift)
+    // Starfield Particle Canvas (White/Blue Stars)
     // -------------------------------------------------------------
     const canvas = document.getElementById('bg-canvas');
     const ctx = canvas.getContext('2d');
@@ -1122,6 +1127,7 @@
     // -------------------------------------------------------------
     const revealScreen = document.getElementById('reveal-screen');
     const profileCard = document.getElementById('profile-card');
+    const cardGlare = document.getElementById('card-glare');
 
     function enterBio() {
       revealScreen.classList.add('faded');
@@ -1134,6 +1140,64 @@
     } else {
       revealScreen.addEventListener('click', enterBio);
     }
+
+    // -------------------------------------------------------------
+    // MAC DUO 3D DEPTH PERSPECTIVE & CRITICALLY DAMPED SPRING TILT
+    // -------------------------------------------------------------
+    let targetTiltX = 0, targetTiltY = 0;
+    let currentTiltX = 0, currentTiltY = 0;
+    let velocityX = 0, velocityY = 0;
+    let glareX = 50, glareY = 50;
+
+    // Critically Damped Spring constants from Mac Duo
+    const springDamping = 0.84;
+    const springStiffness = 0.075;
+
+    window.addEventListener('mousemove', (e) => {
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+
+      // Calculate tilt angles based on cursor offset (-9 to +9 deg)
+      targetTiltX = ((e.clientY - centerY) / centerY) * -9;
+      targetTiltY = ((e.clientX - centerX) / centerX) * 11;
+
+      // Specular glare coords
+      const cardRect = profileCard.getBoundingClientRect();
+      if (cardRect.width > 0 && cardRect.height > 0) {
+        glareX = ((e.clientX - cardRect.left) / cardRect.width) * 100;
+        glareY = ((e.clientY - cardRect.top) / cardRect.height) * 100;
+      }
+    });
+
+    window.addEventListener('mouseleave', () => {
+      targetTiltX = 0;
+      targetTiltY = 0;
+    });
+
+    function renderMacDuoPhysics() {
+      // Spring simulation
+      const forceX = (targetTiltX - currentTiltX) * springStiffness;
+      velocityX = (velocityX + forceX) * springDamping;
+      currentTiltX += velocityX;
+
+      const forceY = (targetTiltY - currentTiltY) * springStiffness;
+      velocityY = (velocityY + forceY) * springDamping;
+      currentTiltY += velocityY;
+
+      if (profileCard.classList.contains('active')) {
+        const isDockOpen = document.body.classList.contains('dock-open');
+        const baseShiftX = isDockOpen ? (window.innerWidth > 1100 ? -160 : (window.innerWidth > 860 ? -80 : 0)) : 0;
+        const baseScale = isDockOpen ? 0.96 : 1.0;
+
+        profileCard.style.transform = `translateX(${baseShiftX}px) perspective(1200px) rotateX(${currentTiltX.toFixed(2)}deg) rotateY(${currentTiltY.toFixed(2)}deg) scale(${baseScale})`;
+        
+        // Update specular depth glare
+        cardGlare.style.background = `radial-gradient(circle at ${glareX.toFixed(1)}% ${glareY.toFixed(1)}%, rgba(56, 189, 248, 0.16) 0%, transparent 65%)`;
+      }
+
+      requestAnimationFrame(renderMacDuoPhysics);
+    }
+    renderMacDuoPhysics();
 
     // -------------------------------------------------------------
     // DOCK TOGGLE & SHIFT INTERACTION
@@ -1161,7 +1225,7 @@
     });
 
     // -------------------------------------------------------------
-    // macOS DOCK WAVE MAGNIFICATION EFFECT (Fixed: No Clipping!)
+    // macOS DOCK WAVE MAGNIFICATION EFFECT (No clipping)
     // -------------------------------------------------------------
     const dock = document.getElementById('macos-dock');
     const dockItems = dock.querySelectorAll('.dock-item');
@@ -1177,7 +1241,6 @@
 
         if (dist < maxDist) {
           const factor = Math.cos((dist / maxDist) * (Math.PI / 2));
-          // Subtle card scale without clipping + icon scale & lift
           const scale = 1 + factor * 0.04;
           const shift = -5 * factor;
           item.style.transform = `scale(${scale}) translateX(${shift}px)`;
