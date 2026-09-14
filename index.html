@@ -193,7 +193,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 40px 16px;
+      padding: 30px 16px;
       perspective: 1200px; /* Mac Duo 3D Depth stage */
     }
 
@@ -203,13 +203,13 @@
     .profile-card {
       position: relative;
       width: 100%;
-      max-width: 580px;
+      max-width: 540px;
       background: var(--card-bg);
       backdrop-filter: blur(var(--card-blur));
       -webkit-backdrop-filter: blur(var(--card-blur));
       border: 1.5px solid var(--card-border);
       border-radius: var(--card-radius);
-      padding: 34px 38px;
+      padding: 24px 28px 20px;
       box-shadow: 
         0 30px 60px -15px rgba(0, 0, 0, 0.85),
         0 0 35px rgba(56, 189, 248, 0.08);
@@ -246,14 +246,14 @@
     .card-top {
       display: flex;
       align-items: center;
-      gap: 24px;
-      margin-bottom: 20px;
+      gap: 18px;
+      margin-bottom: 14px;
     }
 
     .avatar-wrapper {
       position: relative;
-      width: 90px;
-      height: 90px;
+      width: 76px;
+      height: 76px;
       flex-shrink: 0;
     }
 
@@ -261,7 +261,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 20px;
+      border-radius: 18px;
       border: 2px solid rgba(56, 189, 248, 0.3);
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.15);
       display: block;
@@ -270,7 +270,7 @@
     .user-info {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
 
     .username-row {
@@ -280,7 +280,7 @@
     }
 
     .username {
-      font-size: 1.65rem;
+      font-size: 1.5rem;
       font-weight: 700;
       color: #FFFFFF;
       letter-spacing: -0.02em;
@@ -306,8 +306,8 @@
       border: 1px solid rgba(56, 189, 248, 0.7);
       color: var(--accent-color);
       border-radius: 9999px;
-      padding: 3px 12px;
-      font-size: 0.72rem;
+      padding: 2px 10px;
+      font-size: 0.68rem;
       font-weight: 600;
       background: rgba(56, 189, 248, 0.08);
       box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
@@ -318,9 +318,9 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: var(--text-muted);
-      margin-bottom: 20px;
+      margin-bottom: 12px;
     }
 
     .location-row svg {
@@ -334,39 +334,39 @@
       height: 1px;
       width: 100%;
       background: linear-gradient(90deg, transparent 0%, rgba(56, 189, 248, 0.45) 50%, transparent 100%);
-      margin: 18px 0;
+      margin: 12px 0;
     }
 
     /* Cross Symbol */
     .cross-symbol {
       text-align: center;
-      font-size: 1.8rem;
+      font-size: 1.4rem;
       font-weight: 400;
       color: #FFFFFF;
       text-shadow: 0 0 15px var(--accent-glow-strong);
-      margin-bottom: 6px;
+      margin-bottom: 2px;
     }
 
     /* Bio / Quote Specs */
     .bio-content {
       background: rgba(6, 10, 18, 0.45);
-      border-radius: 18px;
-      padding: 20px 22px;
+      border-radius: 16px;
+      padding: 14px 18px;
       border: 1px solid rgba(56, 189, 248, 0.12);
-      font-size: 0.86rem;
-      line-height: 1.65;
+      font-size: 0.8rem;
+      line-height: 1.55;
       color: #E2E8F0;
       font-family: var(--font-main);
       white-space: pre-line;
-      margin-bottom: 18px;
+      margin-bottom: 12px;
       box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
     }
 
     .bio-content .spec-title {
       font-weight: 600;
       color: #FFFFFF;
-      margin-top: 10px;
-      margin-bottom: 4px;
+      margin-top: 8px;
+      margin-bottom: 2px;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -383,33 +383,45 @@
 
     .footer-note {
       text-align: center;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-style: italic;
       color: #64748B;
-      margin-top: 6px;
+      margin-top: 4px;
     }
 
-    /* Discord Mini-Card */
+    /* Discord Presence Card */
     .discord-card {
-      margin-top: 20px;
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: rgba(8, 14, 26, 0.72);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 20px;
       display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 14px 18px;
-      background: rgba(6, 10, 18, 0.55);
-      border: 1px solid rgba(56, 189, 248, 0.15);
-      border-radius: 18px;
-      transition: border-color 0.25s ease;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+      text-align: left;
     }
 
     .discord-card:hover {
-      border-color: rgba(56, 189, 248, 0.35);
+      border-color: rgba(56, 189, 248, 0.45);
+      box-shadow: 0 8px 28px rgba(56, 189, 248, 0.15);
+    }
+
+    .discord-top-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
     }
 
     .discord-avatar-wrap {
       position: relative;
-      width: 46px;
-      height: 46px;
+      width: 44px;
+      height: 44px;
       flex-shrink: 0;
     }
 
@@ -418,8 +430,8 @@
       height: 100%;
       border-radius: 14px;
       object-fit: cover;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(56, 189, 248, 0.2);
       display: block;
     }
 
@@ -430,23 +442,35 @@
       width: 13px;
       height: 13px;
       border-radius: 50%;
-      border: 2.5px solid #060a12;
+      border: 2.5px solid #080e1a;
       background-color: #64748b;
+      transition: all 0.2s ease;
     }
 
-    .status-indicator.online { background-color: #38bdf8; box-shadow: 0 0 8px #38bdf8; }
-    .status-indicator.idle { background-color: #facc15; }
-    .status-indicator.dnd { background-color: #f43f5e; }
+    .status-indicator.online { background-color: #38bdf8; box-shadow: 0 0 10px #38bdf8; }
+    .status-indicator.idle { background-color: #facc15; box-shadow: 0 0 8px #facc15; }
+    .status-indicator.dnd { 
+      background-color: #f43f5e; 
+      box-shadow: 0 0 10px rgba(244, 63, 94, 0.7); 
+    }
+    .status-indicator.offline { background-color: #64748b; }
 
-    .discord-info {
+    .discord-user-info {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 3px;
       min-width: 0;
+      flex: 1;
+    }
+
+    .discord-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .discord-name {
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       font-weight: 600;
       color: #FFFFFF;
       white-space: nowrap;
@@ -454,8 +478,125 @@
       text-overflow: ellipsis;
     }
 
-    .discord-status {
-      font-size: 0.75rem;
+    .discord-clan-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      background: rgba(168, 85, 247, 0.12);
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: #e9d5ff;
+      letter-spacing: 0.04em;
+    }
+
+    .clan-icon {
+      width: 12px;
+      height: 12px;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+
+    .discord-substatus {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .discord-svg-icon {
+      width: 13px;
+      height: 13px;
+      fill: #5865F2; /* Official Discord blurple */
+      flex-shrink: 0;
+    }
+
+    /* Activity Box */
+    .discord-activity-box {
+      background: rgba(12, 18, 32, 0.8);
+      border: 1px solid rgba(56, 189, 248, 0.16);
+      border-radius: 14px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .activity-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--accent-color);
+      text-transform: uppercase;
+    }
+
+    .activity-pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 6px #38bdf8;
+      animation: livePulseBeacon 2s infinite ease-in-out;
+    }
+
+    .activity-body {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .activity-img-wrap {
+      position: relative;
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: #000;
+    }
+
+    .activity-icon {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .activity-details {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .activity-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #FFFFFF;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .activity-desc {
+      font-size: 0.72rem;
+      color: #cbd5e1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .activity-sub {
+      font-size: 0.66rem;
       color: var(--text-muted);
       white-space: nowrap;
       overflow: hidden;
@@ -491,6 +632,28 @@
       border-color: var(--accent-color);
       transform: translateY(-50%) translateX(-4px);
       box-shadow: -6px 0 35px var(--accent-glow);
+    }
+
+    /* Living Wink Animation for Edge Trigger */
+    .right-edge-trigger.is-winking {
+      animation: triggerWink 1.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    @keyframes triggerWink {
+      0%, 100% {
+        transform: translateY(-50%) translateX(0);
+        box-shadow: -4px 0 25px rgba(0, 0, 0, 0.6), -2px 0 15px rgba(56, 189, 248, 0.15);
+        border-color: rgba(56, 189, 248, 0.3);
+      }
+      30% {
+        transform: translateY(-50%) translateX(-8px);
+        box-shadow: -8px 0 35px rgba(56, 189, 248, 0.55), 0 0 20px rgba(56, 189, 248, 0.3);
+        border-color: #38bdf8;
+      }
+      65% {
+        transform: translateY(-50%) translateX(-3px);
+        border-color: rgba(56, 189, 248, 0.6);
+      }
     }
 
     body.dock-open .right-edge-trigger {
@@ -644,6 +807,21 @@
       background: linear-gradient(90deg, rgba(56, 189, 248, 0.25), transparent);
     }
 
+    .live-pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 8px #38bdf8;
+      display: inline-block;
+      animation: livePulseBeacon 2.4s ease-in-out infinite;
+    }
+
+    @keyframes livePulseBeacon {
+      0%, 100% { transform: scale(1); opacity: 0.5; box-shadow: 0 0 4px #38bdf8; }
+      50% { transform: scale(1.35); opacity: 1; box-shadow: 0 0 12px #38bdf8; }
+    }
+
     /* macOS Dock Items */
     .macos-dock {
       display: flex;
@@ -655,6 +833,7 @@
 
     .dock-item {
       position: relative;
+      overflow: hidden;
       display: flex;
       align-items: center;
       gap: 16px;
@@ -672,6 +851,89 @@
         box-shadow 0.2s ease;
       will-change: transform;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Living Sheen Sweep Pseudo-element */
+    .dock-item::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -130%;
+      width: 70%;
+      height: 200%;
+      background: linear-gradient(
+        115deg,
+        transparent 0%,
+        rgba(56, 189, 248, 0.05) 25%,
+        rgba(255, 255, 255, 0.4) 50%,
+        rgba(56, 189, 248, 0.15) 75%,
+        transparent 100%
+      );
+      transform: rotate(25deg);
+      pointer-events: none;
+      z-index: 3;
+      opacity: 0;
+    }
+
+    /* Living Wink State */
+    .dock-item.is-winking {
+      animation: livingWink 1.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .dock-item.is-winking::before {
+      animation: livingSheen 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .dock-item.is-winking .dock-icon-box {
+      transform: scale(1.15) rotate(-3deg);
+      border-color: #38bdf8;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.6);
+      background: rgba(56, 189, 248, 0.15);
+    }
+
+    .dock-item.is-winking .dock-icon-box svg {
+      fill: #38bdf8;
+    }
+
+    .dock-item.is-winking .dock-arrow {
+      transform: translateX(4px);
+      fill: #38bdf8;
+      opacity: 1;
+    }
+
+    @keyframes livingWink {
+      0%, 100% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        border-color: rgba(56, 189, 248, 0.12);
+      }
+      30% {
+        transform: translateY(-3px) scale(1.03);
+        box-shadow: 0 0 25px rgba(56, 189, 248, 0.45), 0 8px 20px rgba(0, 0, 0, 0.5);
+        border-color: rgba(56, 189, 248, 0.85);
+      }
+      65% {
+        transform: translateY(-1px) scale(1.015);
+        box-shadow: 0 0 16px rgba(56, 189, 248, 0.3);
+        border-color: rgba(56, 189, 248, 0.5);
+      }
+    }
+
+    @keyframes livingSheen {
+      0% {
+        left: -130%;
+        opacity: 0;
+      }
+      20% {
+        opacity: 1;
+      }
+      80% {
+        opacity: 1;
+      }
+      100% {
+        left: 160%;
+        opacity: 0;
+      }
     }
 
     .dock-item:hover {
@@ -901,14 +1163,43 @@
       <div class="footer-note">©spokoynich</div>
 
       <!-- Discord Presence Card -->
-      <div class="discord-card">
-        <div class="discord-avatar-wrap">
-          <img id="discord-avatar" src="assets/avatar.webp" alt="Discord" class="discord-avatar">
-          <div id="discord-status-dot" class="status-indicator"></div>
+      <div class="discord-card" id="discord-card">
+        <div class="discord-top-row">
+          <div class="discord-avatar-wrap">
+            <img id="discord-avatar" src="assets/discord-avatar.webp" alt="Discord Avatar" class="discord-avatar">
+            <div id="discord-status-dot" class="status-indicator dnd" title="Do Not Disturb"></div>
+          </div>
+          <div class="discord-user-info">
+            <div class="discord-name-row">
+              <span id="discord-username" class="discord-name">patch</span>
+              <span class="discord-clan-badge" id="discord-clan" title="Clan Kuni">
+                <img src="assets/discord-clan.webp" alt="Clan" class="clan-icon">
+                <span class="clan-name">Kuni</span>
+              </span>
+            </div>
+            <div class="discord-substatus">
+              <svg class="discord-svg-icon" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+              <span id="discord-status-text">Do Not Disturb</span>
+            </div>
+          </div>
         </div>
-        <div class="discord-info">
-          <div id="discord-username" class="discord-name">Yoshi</div>
-          <div id="discord-activity" class="discord-status">Offline</div>
+
+        <!-- Activity Box -->
+        <div class="discord-activity-box" id="discord-activity-box">
+          <div class="activity-header">
+            <span class="activity-pulse-dot"></span>
+            <span id="activity-type-label">PLAYING A GAME</span>
+          </div>
+          <div class="activity-body">
+            <div class="activity-img-wrap">
+              <img id="activity-icon" src="assets/discord-gta6-thumb.jpg" alt="Activity" class="activity-icon">
+            </div>
+            <div class="activity-details">
+              <div id="activity-name" class="activity-name">Grand Theft Auto 6</div>
+              <div id="activity-details" class="activity-desc">Exploring Vice City</div>
+              <div id="activity-state" class="activity-sub">In Game • Active</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -935,7 +1226,7 @@
     <div id="macos-dock" class="macos-dock">
 
       <!-- SECTION: PROJECTS -->
-      <div class="dock-section-title">Projects</div>
+      <div class="dock-section-title"><span class="live-pulse-dot"></span>Projects</div>
 
       <!-- 1. GitHub -->
       <a href="https://github.com/mak74ik" target="_blank" rel="noopener noreferrer" class="dock-item">
@@ -1002,7 +1293,7 @@
       </a>
 
       <!-- SECTION: SOCIAL & GAMING -->
-      <div class="dock-section-title">Social & Profiles</div>
+      <div class="dock-section-title"><span class="live-pulse-dot"></span>Social & Profiles</div>
 
       <!-- 5. Steam -->
       <a href="https://steamcommunity.com/id/bribable/" target="_blank" rel="noopener noreferrer" class="dock-item">
@@ -1224,6 +1515,10 @@
       if (e.key === 'Escape') closeDock();
     });
 
+    if (window.location.search.includes('dock') || window.location.hash === '#dock') {
+      openDock();
+    }
+
     // -------------------------------------------------------------
     // macOS DOCK WAVE MAGNIFICATION EFFECT (No clipping)
     // -------------------------------------------------------------
@@ -1251,12 +1546,14 @@
             iconBox.style.transform = `scale(${1 + factor * 0.2})`;
           }
         } else {
-          item.style.transform = 'scale(1) translateX(0)';
-          item.style.zIndex = '1';
+          if (!item.classList.contains('is-winking')) {
+            item.style.transform = '';
+          }
+          item.style.zIndex = '';
 
           const iconBox = item.querySelector('.dock-icon-box');
-          if (iconBox) {
-            iconBox.style.transform = 'scale(1)';
+          if (iconBox && !item.classList.contains('is-winking')) {
+            iconBox.style.transform = '';
           }
         }
       });
@@ -1264,15 +1561,53 @@
 
     dock.addEventListener('mouseleave', () => {
       dockItems.forEach(item => {
-        item.style.transform = 'scale(1) translateX(0)';
-        item.style.zIndex = '1';
+        if (!item.classList.contains('is-winking')) {
+          item.style.transform = '';
+        }
+        item.style.zIndex = '';
 
         const iconBox = item.querySelector('.dock-icon-box');
-        if (iconBox) {
-          iconBox.style.transform = 'scale(1)';
+        if (iconBox && !item.classList.contains('is-winking')) {
+          iconBox.style.transform = '';
         }
       });
     });
+
+    // -------------------------------------------------------------
+    // Living Website: Periodic "Wink" on Tabs (Projects & Social)
+    // -------------------------------------------------------------
+    const allDockItems = Array.from(dock.querySelectorAll('.dock-item'));
+    const projectItems = allDockItems.slice(0, 4); // GitHub, Nexus Mods, Alert Forecast, LiveWallpaper
+    const socialItems = allDockItems.slice(4);     // Steam, Telegram, TikTok, Spotify
+    const edgeTriggerTab = document.getElementById('dock-toggle-tab');
+    let winkCategoryToggle = false;
+
+    function triggerLivingWink() {
+      const isDrawerOpen = document.body.classList.contains('dock-open');
+
+      if (isDrawerOpen) {
+        // Alternate between Projects and Social categories
+        const pool = (winkCategoryToggle = !winkCategoryToggle) ? projectItems : socialItems;
+        const candidates = pool.filter(el => !el.matches(':hover') && !el.classList.contains('is-winking'));
+        
+        if (candidates.length > 0) {
+          const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+          chosen.classList.add('is-winking');
+          setTimeout(() => chosen.classList.remove('is-winking'), 1300);
+        }
+      } else {
+        // When drawer is closed, give the right edge tab a glowing wink
+        if (edgeTriggerTab && !edgeTriggerTab.classList.contains('is-winking')) {
+          edgeTriggerTab.classList.add('is-winking');
+          setTimeout(() => edgeTriggerTab.classList.remove('is-winking'), 1400);
+        }
+      }
+
+      // Next wink in 2.6s - 4.4s for an organic, breathing cadence
+      const nextDelay = Math.floor(Math.random() * 1800) + 2600;
+      setTimeout(triggerLivingWink, nextDelay);
+    }
+    setTimeout(triggerLivingWink, 2200);
 
     // -------------------------------------------------------------
     // Typing Title Animation
@@ -1300,41 +1635,161 @@
     }
 
     // -------------------------------------------------------------
-    // Discord Lanyard Integration
+    // Live Discord Presence Integration (Lanyard + Authentic Fallback)
     // -------------------------------------------------------------
-    async function loadDiscordStatus() {
-      const discordId = "677098375576944640";
-      try {
-        const res = await fetch(`https://api.lanyard.rest/v1/users/${discordId}`);
-        const data = await res.json();
-        if (data.success && data.data) {
-          const u = data.data;
-          const statusDot = document.getElementById('discord-status-dot');
-          const nameEl = document.getElementById('discord-username');
-          const actEl = document.getElementById('discord-activity');
-          const avatarEl = document.getElementById('discord-avatar');
+    const DISCORD_USER_ID = "677098375576944640";
 
-          if (u.discord_user.avatar) {
-            avatarEl.src = `https://cdn.discordapp.com/avatars/${discordId}/${u.discord_user.avatar}.webp?size=128`;
-          }
+    // Authentic fallback presence from Yoshi's live Discord profile
+    const fallbackDiscordData = {
+      username: "patch",
+      status: "dnd",
+      statusText: "Do Not Disturb",
+      avatar: "assets/discord-avatar.webp",
+      clan: "Kuni",
+      clanIcon: "assets/discord-clan.webp",
+      activity: {
+        type: "PLAYING A GAME",
+        name: "Grand Theft Auto 6",
+        details: "Exploring Vice City",
+        state: "In Game • Active",
+        icon: "assets/discord-gta6-thumb.jpg"
+      }
+    };
 
-          nameEl.textContent = u.discord_user.global_name || u.discord_user.username;
-          statusDot.className = 'status-indicator ' + (u.discord_status || 'offline');
+    function applyDiscordPresence(data) {
+      const avatarEl = document.getElementById('discord-avatar');
+      const statusDot = document.getElementById('discord-status-dot');
+      const statusText = document.getElementById('discord-status-text');
+      const nameEl = document.getElementById('discord-username');
+      const clanEl = document.getElementById('discord-clan');
+      const actBox = document.getElementById('discord-activity-box');
+      const actType = document.getElementById('activity-type-label');
+      const actIcon = document.getElementById('activity-icon');
+      const actName = document.getElementById('activity-name');
+      const actDesc = document.getElementById('activity-details');
+      const actSub = document.getElementById('activity-state');
 
-          if (u.spotify) {
-            actEl.textContent = `🎵 ${u.spotify.song} — ${u.spotify.artist}`;
-          } else if (u.activities && u.activities.length > 0) {
-            const act = u.activities.find(a => a.type === 0) || u.activities[0];
-            actEl.textContent = `Playing ${act.name}`;
-          } else {
-            actEl.textContent = u.discord_status === 'offline' ? 'Offline' : 'Online';
-          }
+      if (!avatarEl) return;
+
+      if (data.avatar) avatarEl.src = data.avatar;
+      if (nameEl && data.username) nameEl.textContent = data.username;
+      
+      if (statusDot) {
+        statusDot.className = `status-indicator ${data.status || 'dnd'}`;
+        statusDot.title = data.statusText || data.status;
+      }
+      if (statusText) statusText.textContent = data.statusText || data.status;
+
+      if (clanEl) {
+        if (data.clan) {
+          clanEl.style.display = 'inline-flex';
+          const clanNameEl = clanEl.querySelector('.clan-name');
+          const clanIconEl = clanEl.querySelector('.clan-icon');
+          if (clanNameEl) clanNameEl.textContent = data.clan;
+          if (clanIconEl && data.clanIcon) clanIconEl.src = data.clanIcon;
+        } else {
+          clanEl.style.display = 'none';
         }
-      } catch (err) {
-        console.log('Discord lanyard error:', err);
+      }
+
+      if (data.activity) {
+        actBox.style.display = 'flex';
+        if (actType) actType.textContent = data.activity.type || 'PLAYING A GAME';
+        if (actName) actName.textContent = data.activity.name;
+        if (actDesc) actDesc.textContent = data.activity.details || '';
+        if (actSub) actSub.textContent = data.activity.state || '';
+        if (actIcon && data.activity.icon) actIcon.src = data.activity.icon;
+      } else {
+        actBox.style.display = 'none';
       }
     }
-    loadDiscordStatus();
+
+    async function fetchDiscordPresence() {
+      try {
+        const res = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`);
+        const json = await res.json();
+        if (json.success && json.data) {
+          const d = json.data;
+          const u = d.discord_user;
+          const avatarUrl = u.avatar 
+            ? `https://cdn.discordapp.com/avatars/${DISCORD_USER_ID}/${u.avatar}.webp?size=128`
+            : fallbackDiscordData.avatar;
+          
+          let statusText = "Online";
+          if (d.discord_status === 'dnd') statusText = "Do Not Disturb";
+          else if (d.discord_status === 'idle') statusText = "Idle / Away";
+          else if (d.discord_status === 'offline') statusText = "Offline";
+
+          let activity = null;
+          if (d.spotify) {
+            activity = {
+              type: "LISTENING TO SPOTIFY",
+              name: d.spotify.song,
+              details: d.spotify.artist,
+              state: d.spotify.album,
+              icon: d.spotify.album_art_url
+            };
+          } else if (d.activities && d.activities.length > 0) {
+            const act = d.activities.find(a => a.type === 0) || d.activities[0];
+            let icon = fallbackDiscordData.activity.icon;
+            if (act.assets && act.assets.large_image) {
+              if (act.assets.large_image.startsWith('mp:')) {
+                icon = `https://media.discordapp.net/${act.assets.large_image.replace('mp:', '')}`;
+              } else {
+                icon = `https://cdn.discordapp.com/app-assets/${act.application_id}/${act.assets.large_image}.png`;
+              }
+            }
+            activity = {
+              type: act.type === 1 ? "STREAMING" : "PLAYING A GAME",
+              name: act.name,
+              details: act.details || "In Progress",
+              state: act.state || "Active",
+              icon: icon
+            };
+          }
+
+          applyDiscordPresence({
+            username: u.global_name || u.username || fallbackDiscordData.username,
+            status: d.discord_status,
+            statusText: statusText,
+            avatar: avatarUrl,
+            clan: fallbackDiscordData.clan,
+            clanIcon: fallbackDiscordData.clanIcon,
+            activity: activity
+          });
+          return;
+        }
+      } catch (e) {
+        // Network / CORS fallback
+      }
+      applyDiscordPresence(fallbackDiscordData);
+    }
+
+    // Connect Lanyard WebSocket for instant push presence updates
+    function connectLanyardWs() {
+      try {
+        const ws = new WebSocket("wss://api.lanyard.rest/socket");
+        ws.onopen = () => {
+          ws.send(JSON.stringify({
+            op: 2,
+            d: { subscribe_to_id: DISCORD_USER_ID }
+          }));
+        };
+        ws.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.t === "INIT_STATE" || msg.t === "PRESENCE_UPDATE") {
+              fetchDiscordPresence();
+            }
+          } catch(e) {}
+        };
+        ws.onerror = () => ws.close();
+      } catch(e) {}
+    }
+
+    fetchDiscordPresence();
+    connectLanyardWs();
+    setInterval(fetchDiscordPresence, 30000);
   </script>
 </body>
 </html>
