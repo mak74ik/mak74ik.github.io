@@ -2737,114 +2737,110 @@
     let dvdRotation = 0;
     let dvdRotVel = 0;
 
-    // Iconic Kill Streak Tiers
+    // Authentic Dota 2 / Unreal Tournament Announcer Audio Pool
+    const announcerAudioMap = {
+      firstblood: new Audio('assets/sounds/firstblood.mp3'),
+      doublekill: new Audio('assets/sounds/doublekill.mp3'),
+      triplekill: new Audio('assets/sounds/triplekill.mp3'),
+      ultrakill: new Audio('assets/sounds/ultrakill.mp3'),
+      rampage: new Audio('assets/sounds/rampage.mp3'),
+      unstoppable: new Audio('assets/sounds/unstoppable.mp3'),
+      wickedsick: new Audio('assets/sounds/wickedsick.mp3'),
+      monsterkill: new Audio('assets/sounds/monsterkill.mp3'),
+      godlike: new Audio('assets/sounds/godlike.mp3'),
+      holyshit: new Audio('assets/sounds/holyshit.mp3')
+    };
+
+    // Preload audio files so they trigger with zero latency
+    Object.values(announcerAudioMap).forEach(a => {
+      a.preload = 'auto';
+    });
+
+    let currentAnnouncerAudio = null;
+
+    function playAnnouncerAudio(soundKey) {
+      if (!sfxEnabled) return;
+      try {
+        if (currentAnnouncerAudio) {
+          currentAnnouncerAudio.pause();
+          currentAnnouncerAudio.currentTime = 0;
+        }
+        const audio = announcerAudioMap[soundKey];
+        if (audio) {
+          currentAnnouncerAudio = audio;
+          audio.currentTime = 0;
+          audio.volume = 1.0;
+          const playPromise = audio.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(() => {});
+          }
+        }
+      } catch (e) {}
+    }
+
+    // Iconic Dota 2 / Quake Kill Streak Tiers
     const streakTiers = {
       1: {
-        title: "🎯 CORNER HIT! 🎯",
-        sub: "1x COMBO • FIRST BLOOD",
-        voice: "First blood",
+        title: "🩸 FIRST BLOOD! 🩸",
+        sub: "1x CORNER • FIRST BLOOD",
+        sound: "firstblood",
         color: "#38bdf8"
       },
       2: {
         title: "💥 DOUBLE KILL! 💥",
         sub: "2x IN A ROW • SICK ANGLE",
-        voice: "Double kill",
+        sound: "doublekill",
         color: "#22c55e"
       },
       3: {
         title: "🔥 TRIPLE KILL! 🔥",
-        sub: "3x STREAK • UNSTOPPABLE!",
-        voice: "Triple kill",
+        sub: "3x STREAK • ON FIRE!",
+        sound: "triplekill",
         color: "#f59e0b"
       },
       4: {
         title: "⚡ ULTRA KILL! ⚡",
         sub: "4x IN A ROW • GODLIKE!",
-        voice: "Ultra kill",
+        sound: "ultrakill",
         color: "#ec4899"
       },
       5: {
         title: "👑 RAMPAGE! 👑",
         sub: "5x CORNER GOD • UNREAL!",
-        voice: "Rampage",
+        sound: "rampage",
         color: "#a855f7"
       },
       6: {
+        title: "⛔ UNSTOPPABLE! ⛔",
+        sub: "6x IN A ROW • UNSTOPPABLE!",
+        sound: "unstoppable",
+        color: "#f43f5e"
+      },
+      7: {
+        title: "☣️ WICKED SICK! ☣️",
+        sub: "7x CORNER GOD • WICKED SICK!",
+        sound: "wickedsick",
+        color: "#e11d48"
+      },
+      8: {
         title: "💀 MONSTER KILL! 💀",
-        sub: "6x STREAK • HOLY SHIT!",
-        voice: "Monster kill",
+        sub: "8x STREAK • MONSTER KILL!",
+        sound: "monsterkill",
+        color: "#dc2626"
+      },
+      9: {
+        title: "⚡ GODLIKE! ⚡",
+        sub: "9x IN A ROW • GODLIKE!",
+        sound: "godlike",
+        color: "#b91c1c"
+      },
+      10: {
+        title: "🔥 HOLY SHIT! 🔥",
+        sub: "10x+ CORNER GOD • BEYOND GODLIKE!",
+        sound: "holyshit",
         color: "#ef4444"
       }
     };
-
-    function playAnnouncerVoice(text) {
-      if (!window.speechSynthesis) return;
-      try {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.95;
-        utterance.pitch = 0.58; // deep booming tournament announcer pitch
-        utterance.volume = 1.0;
-
-        const voices = window.speechSynthesis.getVoices();
-        const enVoice = voices.find(v => (v.lang.startsWith('en') || v.lang.startsWith('en-US')) && !v.name.includes('Compact')) || voices[0];
-        if (enVoice) utterance.voice = enVoice;
-
-        window.speechSynthesis.speak(utterance);
-      } catch (e) {}
-    }
-
-    function playStreakSound(streak) {
-      if (!sfxEnabled) return;
-      try {
-        initAudio();
-        if (!audioCtx) return;
-        const now = audioCtx.currentTime;
-
-        if (streak === 1) {
-          playCyberSound('blip', 980);
-          setTimeout(() => playCyberSound('blip', 1320), 80);
-          setTimeout(() => playCyberSound('blip', 1760), 160);
-        } else if (streak === 2) {
-          [440, 554, 659, 880].forEach((freq, idx) => {
-            setTimeout(() => playCyberSound('blip', freq), idx * 55);
-          });
-        } else if (streak === 3) {
-          // Triple Kill brass blast
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(220, now);
-          osc.frequency.exponentialRampToValueAtTime(880, now + 0.35);
-          gain.gain.setValueAtTime(0.12, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start(now);
-          osc.stop(now + 0.45);
-
-          setTimeout(() => playCyberSound('blip', 1320), 100);
-          setTimeout(() => playCyberSound('blip', 1760), 200);
-        } else if (streak >= 4) {
-          // Ultra Kill / Rampage mega explosion
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(160, now);
-          osc.frequency.exponentialRampToValueAtTime(32, now + 0.65);
-          gain.gain.setValueAtTime(0.2, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start(now);
-          osc.stop(now + 0.75);
-
-          [880, 1174, 1396, 1760, 2093].forEach((f, i) => {
-            setTimeout(() => playCyberSound('blip', f), 80 + i * 45);
-          });
-        }
-      } catch (e) {}
-    }
 
     // Plan route that slices diagonally across the screen and bounces off 1-2 walls before corner!
     function planInteriorRoute(startX, startY) {
@@ -2918,12 +2914,12 @@
     function triggerCornerCelebration() {
       cornerStreak++;
 
-      const tierKey = Math.min(cornerStreak, 6);
+      const tierKey = Math.min(cornerStreak, 10);
       const tier = streakTiers[tierKey] || {
-        title: `👑 RAMPAGE x${cornerStreak}! 👑`,
+        title: `🔥 HOLY SHIT x${cornerStreak}! 🔥`,
         sub: `${cornerStreak}x CORNER GOD • BEYOND GODLIKE!`,
-        voice: "Holy Shit",
-        color: "#e11d48"
+        sound: "holyshit",
+        color: "#ef4444"
       };
 
       if (dvdLogo) {
@@ -2947,11 +2943,11 @@
         clearTimeout(dvdToastTimer);
         dvdToastTimer = setTimeout(() => {
           cornerToast.classList.remove('show', 'rampage');
-        }, 1600);
+        }, 1800);
       }
 
-      playStreakSound(cornerStreak);
-      playAnnouncerVoice(tier.voice);
+      // Play authentic Dota 2 / Unreal Tournament announcer audio!
+      playAnnouncerAudio(tier.sound);
 
       // Spark explosion from the corner
       for (let i = 0; i < 24; i++) {
