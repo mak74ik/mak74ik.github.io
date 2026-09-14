@@ -563,33 +563,25 @@
       100% { transform: translate(calc(-50% + 6px), calc(-50% + 4px)) scale(1.22) rotate(2deg); }
     }
 
-    /* Silky Smooth Text Selection Engine */
+    /* Global Text Selection Lock (Completely prevents text selection and browser selection lag) */
+    *, *::before, *::after {
+      user-select: none !important;
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      -webkit-touch-callout: none !important;
+    }
+
     ::selection {
-      background: rgba(56, 189, 248, 0.42) !important;
-      color: #FFFFFF !important;
-      text-shadow: 0 0 10px rgba(56, 189, 248, 0.9) !important;
+      background: transparent !important;
+      color: inherit !important;
+      text-shadow: none !important;
     }
 
     ::-moz-selection {
-      background: rgba(56, 189, 248, 0.42) !important;
-      color: #FFFFFF !important;
-      text-shadow: 0 0 10px rgba(56, 189, 248, 0.9) !important;
-    }
-
-    /* Prevent accidental text highlight on UI widgets and canvas */
-    .avatar-wrapper,
-    .badge-tag,
-    .dock-toggle-tab,
-    .drawer-panel,
-    .sfx-toggle,
-    .telemetry-dot,
-    .status-indicator,
-    #bg-canvas,
-    #oneko,
-    .dvd-screensaver,
-    .cyber-btn {
-      user-select: none !important;
-      -webkit-user-select: none !important;
+      background: transparent !important;
+      color: inherit !important;
+      text-shadow: none !important;
     }
 
     .badges-row {
@@ -2052,37 +2044,14 @@
     updateCachedCardRect();
     window.addEventListener('resize', updateCachedCardRect);
 
-    // Text selection detection: stop 3D transform while user is dragging or selecting text
-    let isMouseDown = false;
-    let isSelectingText = false;
-
-    window.addEventListener('mousedown', (e) => {
-      isMouseDown = true;
-    });
-
-    window.addEventListener('mouseup', () => {
-      isMouseDown = false;
-      setTimeout(() => {
-        const sel = window.getSelection();
-        isSelectingText = Boolean(sel && sel.toString().trim().length > 0);
-      }, 60);
-    });
-
-    document.addEventListener('selectionchange', () => {
-      const sel = window.getSelection();
-      isSelectingText = Boolean(sel && sel.toString().trim().length > 0);
-    });
+    // Prevent text selection drag events across entire document
+    document.addEventListener('selectstart', (e) => e.preventDefault());
 
     // Silky Smooth Damped Spring constants from Mac Duo
     const springDamping = 0.88;
     const springStiffness = 0.045;
 
     window.addEventListener('mousemove', (e) => {
-      // If user is selecting or dragging over text, keep card rock steady
-      if (isMouseDown || isSelectingText) {
-        return;
-      }
-
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
 
@@ -2104,24 +2073,23 @@
     });
 
     function renderMacDuoPhysics() {
-      // If actively selecting text with mouse down, pause transform updates to prevent Chromium selection lockup
-      if (!isSelectingText || !isMouseDown) {
-        const forceX = (targetTiltX - currentTiltX) * springStiffness;
-        velocityX = (velocityX + forceX) * springDamping;
-        currentTiltX += velocityX;
+      const forceX = (targetTiltX - currentTiltX) * springStiffness;
+      velocityX = (velocityX + forceX) * springDamping;
+      currentTiltX += velocityX;
 
-        const forceY = (targetTiltY - currentTiltY) * springStiffness;
-        velocityY = (velocityY + forceY) * springDamping;
-        currentTiltY += velocityY;
+      const forceY = (targetTiltY - currentTiltY) * springStiffness;
+      velocityY = (velocityY + forceY) * springDamping;
+      currentTiltY += velocityY;
 
-        if (profileCard.classList.contains('active')) {
-          const isDockOpen = document.body.classList.contains('dock-open');
-          const baseShiftX = isDockOpen ? (window.innerWidth > 1100 ? -160 : (window.innerWidth > 860 ? -80 : 0)) : 0;
-          const baseScale = isDockOpen ? 0.96 : 1.0;
+      if (profileCard && profileCard.classList.contains('active')) {
+        const isDockOpen = document.body.classList.contains('dock-open');
+        const baseShiftX = isDockOpen ? (window.innerWidth > 1100 ? -160 : (window.innerWidth > 860 ? -80 : 0)) : 0;
+        const baseScale = isDockOpen ? 0.96 : 1.0;
 
-          profileCard.style.transform = `translateX(${baseShiftX}px) perspective(1200px) rotateX(${currentTiltX.toFixed(2)}deg) rotateY(${currentTiltY.toFixed(2)}deg) scale(${baseScale})`;
-          
-          // Update specular depth glare
+        profileCard.style.transform = `translateX(${baseShiftX}px) perspective(1200px) rotateX(${currentTiltX.toFixed(2)}deg) rotateY(${currentTiltY.toFixed(2)}deg) scale(${baseScale})`;
+        
+        // Update specular depth glare
+        if (cardGlare) {
           cardGlare.style.background = `radial-gradient(circle at ${glareX.toFixed(1)}% ${glareY.toFixed(1)}%, rgba(56, 189, 248, 0.16) 0%, transparent 65%)`;
         }
       }
@@ -2729,7 +2697,8 @@
     const IDLE_LIMIT = 7000;
 
     let cornerStreak = 0;
-    let currentRoute = [];
+    let wallBouncesUntilCorner = Math.floor(Math.random() * 4) + 6; // 6 to 9 wall bounces before corner hit
+    let targetCornerPoint = null;
     let dvdToastTimer = null;
 
     // Ragdoll breaking physics state
@@ -2842,75 +2811,6 @@
       }
     };
 
-    // Plan route that slices diagonally across the screen and bounces off 1-2 walls before corner!
-    function planInteriorRoute(startX, startY) {
-      const maxX = Math.max(20, window.innerWidth - dvdWidth);
-      const maxY = Math.max(20, window.innerHeight - dvdHeight);
-
-      const corners = [
-        { x: 0, y: 0 },
-        { x: maxX, y: 0 },
-        { x: 0, y: maxY },
-        { x: maxX, y: maxY }
-      ];
-
-      // Targets: corners that are away from start (at least 250px away)
-      const validTargets = corners.filter(c => Math.hypot(c.x - startX, c.y - startY) > 250);
-      const target = (validTargets.length > 0 ? validTargets : corners)[Math.floor(Math.random() * (validTargets.length || corners.length))];
-
-      const candidates = [];
-
-      // 1. Direct diagonal cross through center
-      const dxDir = target.x - startX;
-      const dyDir = target.y - startY;
-      if (Math.abs(dxDir) > 200 && Math.abs(dyDir) > 150) {
-        candidates.push([{ x: target.x, y: target.y, isCorner: true }]);
-      }
-
-      // 2. 1-bounce off horizontal wall (top y=0 or bottom y=maxY)
-      [0, maxY].forEach(wallY => {
-        const mirY = 2 * wallY - target.y;
-        const mirDx = target.x - startX;
-        const mirDy = mirY - startY;
-        if (mirDy !== 0) {
-          const t = (wallY - startY) / mirDy;
-          if (t > 0.15 && t < 0.85) {
-            const xHit = startX + mirDx * t;
-            if (xHit > 80 && xHit < maxX - 80) {
-              candidates.push([
-                { x: xHit, y: wallY, isCorner: false },
-                { x: target.x, y: target.y, isCorner: true }
-              ]);
-            }
-          }
-        }
-      });
-
-      // 3. 1-bounce off vertical wall (left x=0 or right x=maxX)
-      [0, maxX].forEach(wallX => {
-        const mirX = 2 * wallX - target.x;
-        const mirDx = mirX - startX;
-        const mirDy = target.y - startY;
-        if (mirDx !== 0) {
-          const t = (wallX - startX) / mirDx;
-          if (t > 0.15 && t < 0.85) {
-            const yHit = startY + mirDy * t;
-            if (yHit > 80 && yHit < maxY - 80) {
-              candidates.push([
-                { x: wallX, y: yHit, isCorner: false },
-                { x: target.x, y: target.y, isCorner: true }
-              ]);
-            }
-          }
-        }
-      });
-
-      if (candidates.length > 0) {
-        return candidates[Math.floor(Math.random() * candidates.length)];
-      }
-      return [{ x: target.x, y: target.y, isCorner: true }];
-    }
-
     function triggerCornerCelebration() {
       cornerStreak++;
 
@@ -2950,7 +2850,7 @@
       playAnnouncerAudio(tier.sound);
 
       // Spark explosion from the corner
-      for (let i = 0; i < 24; i++) {
+      for (let i = 0; i < 28; i++) {
         const angle = Math.random() * Math.PI * 2;
         const spd = Math.random() * 5 + 2;
         cursorSparks.push({
@@ -3021,41 +2921,87 @@
         return;
       }
 
-      if (!currentRoute || currentRoute.length === 0) {
-        currentRoute = planInteriorRoute(dvdX, dvdY);
-      }
+      // If we are currently tracking towards a precision corner strike
+      if (targetCornerPoint) {
+        const dx = targetCornerPoint.x - dvdX;
+        const dy = targetCornerPoint.y - dvdY;
+        const dist = Math.hypot(dx, dy);
 
-      const waypoint = currentRoute[0];
-      const dx = waypoint.x - dvdX;
-      const dy = waypoint.y - dvdY;
-      const dist = Math.hypot(dx, dy);
-
-      if (dist <= dvdSpeed * 1.5) {
-        // Arrived at waypoint!
-        dvdX = waypoint.x;
-        dvdY = waypoint.y;
-        currentRoute.shift();
-
-        if (waypoint.isCorner) {
-          // HIT THE CORNER!
+        if (dist <= dvdSpeed * 1.5) {
+          // HIT THE CORNER DEAD-ON!
+          dvdX = targetCornerPoint.x;
+          dvdY = targetCornerPoint.y;
           triggerCornerCelebration();
-          currentRoute = planInteriorRoute(dvdX, dvdY);
+          targetCornerPoint = null;
+          // Set 6 to 9 normal wall bounces before the next corner hit!
+          wallBouncesUntilCorner = Math.floor(Math.random() * 4) + 6;
+
+          // Bounce back into the screen at a natural angle away from this corner
+          const cornerVx = (dvdX === 0 ? 1 : -1) * (Math.random() * 1.5 + 3.8);
+          const cornerVy = (dvdY === 0 ? 1 : -1) * (Math.random() * 1.5 + 3.2);
+          const spd = Math.hypot(cornerVx, cornerVy);
+          dvdVx = (cornerVx / spd) * dvdSpeed;
+          dvdVy = (cornerVy / spd) * dvdSpeed;
         } else {
-          // Bounced off wall in the middle of screen
+          dvdVx = (dx / dist) * dvdSpeed;
+          dvdVy = (dy / dist) * dvdSpeed;
+          dvdX += dvdVx;
+          dvdY += dvdVy;
+        }
+      } else {
+        // Natural screensaver wall-to-wall bouncing
+        dvdX += dvdVx;
+        dvdY += dvdVy;
+
+        let hitWall = false;
+
+        if (dvdX <= 0) {
+          dvdX = 0;
+          dvdVx = Math.abs(dvdVx);
+          hitWall = true;
+        } else if (dvdX >= maxX) {
+          dvdX = maxX;
+          dvdVx = -Math.abs(dvdVx);
+          hitWall = true;
+        }
+
+        if (dvdY <= 0) {
+          dvdY = 0;
+          dvdVy = Math.abs(dvdVy);
+          hitWall = true;
+        } else if (dvdY >= maxY) {
+          dvdY = maxY;
+          dvdVy = -Math.abs(dvdVy);
+          hitWall = true;
+        }
+
+        if (hitWall) {
           playCyberSound('blip', 540);
-          // Subtle color pulse on wall bounce
-          const wallColors = ['#38bdf8', '#06b6d4', '#60a5fa', '#818cf8'];
+          const wallColors = ['#38bdf8', '#06b6d4', '#60a5fa', '#818cf8', '#34d399', '#a78bfa'];
           const randCol = wallColors[Math.floor(Math.random() * wallColors.length)];
           if (dvdLogo) {
             dvdLogo.style.color = randCol;
             dvdLogo.style.boxShadow = `0 0 25px ${randCol}, inset 0 0 14px ${randCol}`;
           }
+
+          // Subtle organic angle jitter so it explores the whole display
+          const currentAngle = Math.atan2(dvdVy, dvdVx) + (Math.random() - 0.5) * 0.22;
+          dvdVx = Math.cos(currentAngle) * dvdSpeed;
+          dvdVy = Math.sin(currentAngle) * dvdSpeed;
+          if (dvdX <= 0) dvdVx = Math.abs(dvdVx);
+          if (dvdX >= maxX) dvdVx = -Math.abs(dvdVx);
+          if (dvdY <= 0) dvdVy = Math.abs(dvdVy);
+          if (dvdY >= maxY) dvdVy = -Math.abs(dvdVy);
+
+          wallBouncesUntilCorner--;
+
+          // When countdown reaches 0, aim directly at the corner along current trajectory!
+          if (wallBouncesUntilCorner <= 0) {
+            const targetX = dvdVx > 0 ? maxX : 0;
+            const targetY = dvdVy > 0 ? maxY : 0;
+            targetCornerPoint = { x: targetX, y: targetY };
+          }
         }
-      } else {
-        dvdVx = (dx / dist) * dvdSpeed;
-        dvdVy = (dy / dist) * dvdSpeed;
-        dvdX += dvdVx;
-        dvdY += dvdVy;
       }
 
       // Clamp inside screen bounds
@@ -3169,7 +3115,13 @@
         });
       }
 
-      currentRoute = planInteriorRoute(dvdX, dvdY);
+      wallBouncesUntilCorner = Math.floor(Math.random() * 4) + 6;
+      targetCornerPoint = null;
+      const repairAngle = Math.random() * Math.PI * 2;
+      dvdVx = Math.cos(repairAngle) * dvdSpeed;
+      dvdVy = Math.sin(repairAngle) * dvdSpeed;
+      if (Math.abs(dvdVx) < 2) dvdVx = 3.8 * (dvdVx >= 0 ? 1 : -1);
+      if (Math.abs(dvdVy) < 2) dvdVy = 3.4 * (dvdVy >= 0 ? 1 : -1);
     }
 
     function startDvdScreensaver() {
@@ -3178,7 +3130,13 @@
       if (dvdOverlay) dvdOverlay.classList.add('active');
       dvdX = Math.floor(window.innerWidth / 2) - 60;
       dvdY = Math.floor(window.innerHeight / 2) - 30;
-      currentRoute = planInteriorRoute(dvdX, dvdY);
+      const initAngle = (Math.random() * 0.7 + 0.35) * (Math.random() > 0.5 ? 1 : -1);
+      dvdVx = Math.cos(initAngle) * dvdSpeed;
+      dvdVy = Math.sin(initAngle) * dvdSpeed;
+      if (Math.abs(dvdVx) < 2) dvdVx = 3.8 * (dvdVx >= 0 ? 1 : -1);
+      if (Math.abs(dvdVy) < 2) dvdVy = 3.4 * (dvdVy >= 0 ? 1 : -1);
+      wallBouncesUntilCorner = Math.floor(Math.random() * 4) + 6;
+      targetCornerPoint = null;
       cancelAnimationFrame(dvdAnimFrame);
       dvdAnimFrame = requestAnimationFrame(stepDvd);
     }
@@ -3191,6 +3149,8 @@
       isDvdBroken = false;
       dvdRotation = 0;
       dvdRotVel = 0;
+      wallBouncesUntilCorner = Math.floor(Math.random() * 4) + 6;
+      targetCornerPoint = null;
       if (dvdLogo) {
         dvdLogo.classList.remove('broken');
         dvdLogo.style.transform = `translate3d(${dvdX.toFixed(1)}px, ${dvdY.toFixed(1)}px, 0)`;
