@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#af0d08">
+  <title>Yoshi</title>
+  
+  <!-- Open Graph & Meta -->
+  <meta name="description" content="ради неё | 240km/h PEEK">
+  <meta property="og:title" content="yoshi">
+  <meta property="og:description" content="ради неё | 240km/h PEEK">
+  <meta property="og:site_name" content="fakecrime">
+  <meta property="og:type" content="profile">
+  <meta property="og:image" content="assets/embed.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="yoshi">
+  <meta name="twitter:description" content="ради неё | 240km/h PEEK">
+  <meta name="twitter:image" content="assets/embed.jpg">
+  <link rel="shortcut icon" href="assets/favicon.webp" type="image/webp">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    @font-face {
+      font-family: 'Unbounded';
+      src: url('assets/unbounded.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      --font-main: 'Unbounded', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --theme-color: #404040;
+      --accent-color: #F97316;
+      --text-main: #FFFFFF;
+      --text-muted: #A8A29E;
+      --card-bg: rgba(28, 12, 16, 0.42);
+      --card-border: rgba(140, 125, 125, 0.28);
+      --card-blur: 24px;
+      --card-radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: #000000;
+      color: var(--text-main);
+      font-family: var(--font-main);
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* Background Video Container */
+    .bg-video-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .bg-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: blur(2px) brightness(0.8);
+      transform: scale(1.04);
+      transition: filter 0.8s ease;
+    }
+
+    .bg-tint {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.75) 100%);
+    }
+
+    /* Subtle Scanlines / Noise Overlay */
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.04;
+      background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.15) 0px, transparent 1px, transparent 2px);
+    }
+
+    /* Click to Enter Overlay Screen */
+    #reveal-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      cursor: pointer;
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s;
+    }
+
+    #reveal-screen.faded {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .reveal-text {
+      font-size: 1.15rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      color: #FFFFFF;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+      animation: pulseText 2s ease-in-out infinite alternate;
+      padding: 16px 24px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+    }
+
+    @keyframes pulseText {
+      0% {
+        opacity: 0.65;
+        transform: scale(0.98);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1.02);
+      }
+    }
+
+    /* Floating Sound Control Button */
+    .sound-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 60;
+      background: rgba(18, 18, 22, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 9999px;
+      width: 44px;
+      height: 44px;
+      color: #FFFFFF;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .sound-btn:hover {
+      background: rgba(30, 30, 38, 0.9);
+      border-color: var(--accent-color);
+      transform: scale(1.08);
+    }
+
+    .sound-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    /* Main Container & Profile Card */
+    .main-wrapper {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+
+    .profile-card {
+      width: 100%;
+      max-width: 580px;
+      background: var(--card-bg);
+      backdrop-filter: blur(var(--card-blur));
+      -webkit-backdrop-filter: blur(var(--card-blur));
+      border: 1.5px solid var(--card-border);
+      border-radius: var(--card-radius);
+      padding: 32px 36px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 35px rgba(255, 255, 255, 0.03);
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .profile-card.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Card Top Header: Avatar + Nick + Badges */
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 20px;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      flex-shrink: 0;
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      display: block;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .username-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .username {
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -0.02em;
+      position: relative;
+      display: inline-block;
+      background-image: url('assets/sparkles.gif');
+      background-size: cover;
+      background-position: center;
+      width: fit-content;
+    }
+
+    .badges-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .badge-invited {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 3px 8px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: #E2E8F0;
+      transition: all 0.2s ease;
+    }
+
+    .badge-invited:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .badge-invited svg {
+      width: 12px;
+      height: 12px;
+      fill: var(--accent-color);
+    }
+
+    .badge-tag {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(249, 115, 22, 0.6);
+      color: var(--accent-color);
+      border-radius: 9999px;
+      padding: 2px 10px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      background: rgba(249, 115, 22, 0.06);
+    }
+
+    /* Location Row */
+    .location-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .location-row svg {
+      width: 14px;
+      height: 14px;
+      fill: var(--accent-color);
+    }
+
+    /* Gradient Divider */
+    .divider {
+      height: 1px;
+      width: 100%;
+      background: linear-gradient(90deg, transparent 0%, rgba(249, 115, 22, 0.35) 50%, transparent 100%);
+      margin: 18px 0;
+    }
+
+    /* Cross Symbol */
+    .cross-symbol {
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: 400;
+      color: #FFFFFF;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      margin-bottom: 6px;
+    }
+
+    /* Bio / Quote Specs */
+    .bio-content {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 16px;
+      padding: 18px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.86rem;
+      line-height: 1.65;
+      color: #D1D5DB;
+      font-family: var(--font-main);
+      white-space: pre-line;
+      margin-bottom: 18px;
+    }
+
+    .bio-content .spec-title {
+      font-weight: 600;
+      color: #FFFFFF;
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.75rem;
+      font-style: italic;
+      color: #71717A;
+      margin-top: 6px;
+    }
+
+    /* Social Links Grid */
+    .social-links {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      margin-top: 22px;
+      flex-wrap: wrap;
+    }
+
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      color: #FFFFFF;
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(8px);
+    }
+
+    .social-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--accent-color);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(249, 115, 22, 0.2);
+    }
+
+    .social-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--accent-color);
+      transition: transform 0.2s ease;
+    }
+
+    .social-btn:hover svg {
+      transform: scale(1.1);
+    }
+
+    /* Discord Mini-Card */
+    .discord-card {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+    }
+
+    .discord-avatar-wrap {
+      position: relative;
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+    }
+
+    .discord-avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 14px;
+      object-fit: cover;
+      background: rgba(255, 255, 255, 0.08);
+      display: block;
+    }
+
+    .status-indicator {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      border: 2.5px solid #141416;
+      background-color: #747f8d; /* default offline */
+    }
+
+    .status-indicator.online { background-color: #23a55a; }
+    .status-indicator.idle { background-color: #f0b232; }
+    .status-indicator.dnd { background-color: #f23f43; }
+
+    .discord-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .discord-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #FFFFFF;
+      truncate: true;
+    }
+
+    .discord-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media (max-width: 480px) {
+      .profile-card {
+        padding: 24px 20px;
+      }
+      .card-top {
+        gap: 16px;
+      }
+      .avatar-wrapper {
+        width: 74px;
+        height: 74px;
+      }
+      .username {
+        font-size: 1.35rem;
+      }
+      .social-btn {
+        padding: 8px 14px;
+        font-size: 0.78rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Video -->
+  <div class="bg-video-wrapper">
+    <video id="bg-video" class="bg-video" loop muted playsinline disablepictureinpicture src="assets/background.mp4"></video>
+    <div class="bg-tint"></div>
+  </div>
+
+  <!-- Noise Overlay -->
+  <div class="noise-overlay"></div>
+
+  <!-- Sound Toggle Button -->
+  <button id="sound-btn" class="sound-btn" title="Toggle Sound" aria-label="Toggle Sound">
+    <!-- Unmuted Icon -->
+    <svg id="icon-sound-on" style="display:none;" viewBox="0 0 24 24">
+      <path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-2.5 9h-3.5v-4.5h3.5l4.5-4.5v13.5l-4.5-4.5zm-5 0v-4.5h-3.5v4.5h3.5z"/>
+    </svg>
+    <!-- Muted Icon -->
+    <svg id="icon-sound-off" viewBox="0 0 24 24">
+      <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27l4.73 4.73H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+    </svg>
+  </button>
+
+  <!-- Reveal Overlay Screen -->
+  <div id="reveal-screen">
+    <div class="reveal-text">click to fuck Yoshi</div>
+  </div>
+
+  <!-- Main Profile Content -->
+  <div class="main-wrapper">
+    <div id="profile-card" class="profile-card">
+      
+      <!-- Card Top: Avatar, Nickname, Badges -->
+      <div class="card-top">
+        <div class="avatar-wrapper">
+          <img src="assets/avatar.webp" alt="Avatar" class="avatar-img" draggable="false">
+        </div>
+        <div class="user-info">
+          <div class="username-row">
+            <h1 class="username">mizyqa</h1>
+          </div>
+          <div class="badges-row">
+            <div class="badge-invited" title="Invited Member">
+              <svg viewBox="0 0 512 512">
+                <path d="M416 172h-40v-52a120 120 0 0 0-240 0v52H96a60 60 0 0 0-60 60v220a60 60 0 0 0 60 60h320a60 60 0 0 0 60-60V232a60 60 0 0 0-60-60m-220-52a60 60 0 0 1 120 0v52H196zm90 244v38a30 30 0 1 1-60 0v-38a60 60 0 1 1 60 0"></path>
+              </svg>
+              <span>Invited</span>
+            </div>
+            <div class="badge-tag">Yoshi</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Location -->
+      <div class="location-row">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 0c-4.198 0-8 3.403-8 7.602 0 4.198 3.469 9.21 8 16.398 4.531-7.188 8-12.2 8-16.398 0-4.199-3.801-7.602-8-7.602zm0 11c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"></path>
+        </svg>
+        <span>в сети</span>
+      </div>
+
+      <!-- Divider -->
+      <div class="divider"></div>
+
+      <!-- Cross -->
+      <div class="cross-symbol">♱</div>
+
+      <!-- Divider -->
+      <div class="divider"></div>
+
+      <!-- Bio / Specs Quote -->
+      <div class="bio-content">
+▿ ɴɪᴄᴋ: mizyqa | Yoshi | Cody
+▿ ᴀɢᴇ: 18
+▿ ᴛᴇᴀᴍ:
+▿ Sex: )))
+▿ ꜱᴋɪʟʟ: low
+
+<div class="spec-title">Valve Steam Deck OLED 512GB</div>
+<div class="spec-title">Laptop Specs</div>
+▿ 3TB SSD m2 storage
+▿ 16gb ddr5 5200
+▿ RTX 4060 8gb
+▿ i7-13620H
+      </div>
+
+      <!-- Divider -->
+      <div class="divider"></div>
+
+      <!-- Footer Quote -->
+      <div class="footer-note">©spokoynich</div>
+
+      <!-- Social Links -->
+      <div class="social-links">
+        <!-- Steam -->
+        <a href="https://steamcommunity.com/id/bribable/" target="_blank" rel="noopener noreferrer" class="social-btn">
+          <svg viewBox="0 0 24 24">
+            <path d="M24 12c0 6.627-5.373 12-12 12-5.782 0-10.608-4.091-11.744-9.537l4.764 2.003c.285 1.441 1.56 2.547 3.115 2.534 1.723-.017 3.105-1.414 3.116-3.129l.007-.003 3.602-2.684c2.304.024 4.14-1.833 4.14-4.091 0-2.26-1.834-4.093-4.093-4.093-2.234 0-4.048 1.791-4.09 4.015l-2.64 3.693c-.668-.014-1.269.169-1.791.51l-6.294-2.646c.708-5.953 5.765-10.572 11.908-10.572 6.627 0 12 5.373 12 12zm-16.577 5.477l-1.544-.649c.38.858 1.236 1.461 2.249 1.457 1.346-.012 2.422-1.11 2.41-2.455-.012-1.329-1.104-2.41-2.432-2.41-.287.001-.57.05-.86.16l1.542.648c.898.378 1.319 1.411.941 2.308-.376.896-1.409 1.318-2.306.941zm7.484-5.602c-1.533 0-2.781-1.249-2.781-2.782 0-1.534 1.248-2.782 2.781-2.782 1.534 0 2.781 1.248 2.781 2.782 0 1.533-1.247 2.782-2.781 2.782zm0-.682c1.159 0 2.1-.942 2.1-2.101 0-1.158-.94-2.102-2.1-2.102s-2.102.943-2.102 2.102c.001 1.159.943 2.101 2.102 2.101z"></path>
+          </svg>
+          <span>Steam</span>
+        </a>
+
+        <!-- TikTok -->
+        <a href="https://www.tiktok.com/@mizyqqa" target="_blank" rel="noopener noreferrer" class="social-btn">
+          <svg viewBox="0 0 24 24">
+            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"></path>
+          </svg>
+          <span>TikTok</span>
+        </a>
+
+        <!-- Telegram -->
+        <a href="https://t.me/+g8HlBBrRy7EwNGMy" target="_blank" rel="noopener noreferrer" class="social-btn">
+          <svg viewBox="0 0 24 24">
+            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"></path>
+          </svg>
+          <span>Telegram</span>
+        </a>
+
+        <!-- Spotify -->
+        <a href="https://open.spotify.com/user/31pe6cdbjwwqstyw4esshin6depa?si=0eee13eab1794490" target="_blank" rel="noopener noreferrer" class="social-btn">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"></path>
+          </svg>
+          <span>Spotify</span>
+        </a>
+      </div>
+
+      <!-- Discord Presence Card -->
+      <div class="discord-card">
+        <div class="discord-avatar-wrap">
+          <img id="discord-avatar" src="assets/avatar.webp" alt="Discord" class="discord-avatar">
+          <div id="discord-status-dot" class="status-indicator"></div>
+        </div>
+        <div class="discord-info">
+          <div id="discord-username" class="discord-name">Yoshi</div>
+          <div id="discord-activity" class="discord-status">Offline</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const revealScreen = document.getElementById('reveal-screen');
+    const profileCard = document.getElementById('profile-card');
+    const bgVideo = document.getElementById('bg-video');
+    const soundBtn = document.getElementById('sound-btn');
+    const iconSoundOn = document.getElementById('icon-sound-on');
+    const iconSoundOff = document.getElementById('icon-sound-off');
+
+    function updateSoundUI(isMuted) {
+      if (isMuted) {
+        iconSoundOn.style.display = 'none';
+        iconSoundOff.style.display = 'block';
+      } else {
+        iconSoundOn.style.display = 'block';
+        iconSoundOff.style.display = 'none';
+      }
+    }
+
+    
+    if (window.location.search.includes('enter') || window.location.hash === '#enter') {
+      revealScreen.classList.add('faded');
+      profileCard.classList.add('active');
+    }
+
+    // Start experience on reveal click
+    revealScreen.addEventListener('click', () => {
+      revealScreen.classList.add('faded');
+      profileCard.classList.add('active');
+
+      if (bgVideo) {
+        bgVideo.muted = false;
+        bgVideo.volume = 0.6;
+        bgVideo.play().then(() => {
+          updateSoundUI(false);
+        }).catch(() => {
+          bgVideo.muted = true;
+          bgVideo.play();
+          updateSoundUI(true);
+        });
+      }
+
+      startTitleTyping();
+    });
+
+    // Sound toggle
+    soundBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!bgVideo) return;
+      if (bgVideo.muted) {
+        bgVideo.muted = false;
+        bgVideo.volume = 0.6;
+        bgVideo.play();
+        updateSoundUI(false);
+      } else {
+        bgVideo.muted = true;
+        updateSoundUI(true);
+      }
+    });
+
+    // Typing Title Animation
+    function startTitleTyping() {
+      const titleText = "Yoshi";
+      let index = 0;
+      let deleting = false;
+      
+      setInterval(() => {
+        if (!deleting) {
+          document.title = titleText.substring(0, index + 1);
+          index++;
+          if (index === titleText.length) {
+            setTimeout(() => { deleting = true; }, 1600);
+          }
+        } else {
+          document.title = titleText.substring(0, index - 1);
+          index--;
+          if (index === 0) {
+            deleting = false;
+          }
+        }
+      }, 250);
+    }
+
+    // Discord Lanyard Integration
+    async function loadDiscordStatus() {
+      const discordId = "677098375576944640";
+      try {
+        const res = await fetch(`https://api.lanyard.rest/v1/users/${discordId}`);
+        const data = await res.json();
+        if (data.success && data.data) {
+          const u = data.data;
+          const statusDot = document.getElementById('discord-status-dot');
+          const nameEl = document.getElementById('discord-username');
+          const actEl = document.getElementById('discord-activity');
+          const avatarEl = document.getElementById('discord-avatar');
+
+          if (u.discord_user.avatar) {
+            avatarEl.src = `https://cdn.discordapp.com/avatars/${discordId}/${u.discord_user.avatar}.webp?size=128`;
+          }
+
+          nameEl.textContent = u.discord_user.global_name || u.discord_user.username;
+          statusDot.className = 'status-indicator ' + (u.discord_status || 'offline');
+
+          if (u.spotify) {
+            actEl.textContent = `🎵 ${u.spotify.song} — ${u.spotify.artist}`;
+          } else if (u.activities && u.activities.length > 0) {
+            const act = u.activities.find(a => a.type === 0) || u.activities[0];
+            actEl.textContent = `Playing ${act.name}`;
+          } else {
+            actEl.textContent = u.discord_status === 'offline' ? 'Offline' : 'Online';
+          }
+        }
+      } catch (err) {
+        console.log('Discord lanyard error:', err);
+      }
+    }
+    loadDiscordStatus();
+  </script>
+</body>
+</html>
