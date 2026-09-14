@@ -406,24 +406,84 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%) scale(0.6);
-      padding: 16px 32px;
-      background: rgba(10, 16, 32, 0.95);
+      padding: 18px 38px;
+      background: rgba(6, 10, 22, 0.96);
       border: 2px solid #38bdf8;
-      border-radius: 24px;
+      border-radius: 28px;
       color: #FFFFFF;
-      font-size: 1.35rem;
-      font-weight: 800;
-      box-shadow: 0 0 50px rgba(56, 189, 248, 0.85);
+      font-size: 1.55rem;
+      font-weight: 900;
+      box-shadow: 0 0 60px rgba(56, 189, 248, 0.85);
       opacity: 0;
-      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: all 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       pointer-events: none;
       text-align: center;
       letter-spacing: 0.05em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .corner-hit-toast .toast-title {
+      font-size: 1.55rem;
+      font-weight: 900;
+      line-height: 1.1;
+      text-shadow: 0 0 20px currentColor;
+    }
+
+    .corner-hit-toast .toast-sub {
+      font-size: 0.78rem;
+      letter-spacing: 0.2em;
+      font-weight: 800;
+      opacity: 0.92;
+      text-transform: uppercase;
+      color: #FFFFFF;
     }
 
     .corner-hit-toast.show {
       transform: translate(-50%, -50%) scale(1.15);
       opacity: 1;
+    }
+
+    .corner-hit-toast.rampage {
+      animation: rampageShake 0.18s ease infinite alternate;
+    }
+
+    @keyframes rampageShake {
+      0% { transform: translate(calc(-50% - 6px), calc(-50% - 4px)) scale(1.2) rotate(-2deg); }
+      100% { transform: translate(calc(-50% + 6px), calc(-50% + 4px)) scale(1.22) rotate(2deg); }
+    }
+
+    /* Silky Smooth Text Selection Engine */
+    ::selection {
+      background: rgba(56, 189, 248, 0.42) !important;
+      color: #FFFFFF !important;
+      text-shadow: 0 0 10px rgba(56, 189, 248, 0.9) !important;
+    }
+
+    ::-moz-selection {
+      background: rgba(56, 189, 248, 0.42) !important;
+      color: #FFFFFF !important;
+      text-shadow: 0 0 10px rgba(56, 189, 248, 0.9) !important;
+    }
+
+    /* Prevent accidental text highlight on UI widgets and canvas */
+    .avatar-wrapper,
+    .badge-tag,
+    .dock-toggle-tab,
+    .drawer-panel,
+    .sfx-toggle,
+    .telemetry-dot,
+    .status-indicator,
+    #bg-canvas,
+    #oneko,
+    .dvd-screensaver,
+    .cyber-btn {
+      user-select: none !important;
+      -webkit-user-select: none !important;
     }
 
     .badges-row {
@@ -1677,7 +1737,10 @@
       <div class="dvd-text">DVD</div>
       <div class="dvd-sub">VIDEO</div>
     </div>
-    <div id="corner-hit-toast" class="corner-hit-toast">🎯 CORNER HIT! 🎯</div>
+    <div id="corner-hit-toast" class="corner-hit-toast">
+      <div id="toast-title" class="toast-title">🎯 CORNER HIT! 🎯</div>
+      <div id="toast-sub" class="toast-sub">FIRST BLOOD • 1x STREAK</div>
+    </div>
   </div>
 
   <!-- Oneko Cat Pet -->
@@ -1826,11 +1889,47 @@
     let velocityX = 0, velocityY = 0;
     let glareX = 50, glareY = 50;
 
+    // Cache card dimensions to prevent layout thrashing on mousemove
+    let cachedCardRect = null;
+    function updateCachedCardRect() {
+      if (profileCard) {
+        cachedCardRect = profileCard.getBoundingClientRect();
+      }
+    }
+    updateCachedCardRect();
+    window.addEventListener('resize', updateCachedCardRect);
+
+    // Text selection detection: stop 3D transform while user is dragging or selecting text
+    let isMouseDown = false;
+    let isSelectingText = false;
+
+    window.addEventListener('mousedown', (e) => {
+      isMouseDown = true;
+    });
+
+    window.addEventListener('mouseup', () => {
+      isMouseDown = false;
+      setTimeout(() => {
+        const sel = window.getSelection();
+        isSelectingText = Boolean(sel && sel.toString().trim().length > 0);
+      }, 60);
+    });
+
+    document.addEventListener('selectionchange', () => {
+      const sel = window.getSelection();
+      isSelectingText = Boolean(sel && sel.toString().trim().length > 0);
+    });
+
     // Silky Smooth Damped Spring constants from Mac Duo
     const springDamping = 0.88;
     const springStiffness = 0.045;
 
     window.addEventListener('mousemove', (e) => {
+      // If user is selecting or dragging over text, keep card rock steady
+      if (isMouseDown || isSelectingText) {
+        return;
+      }
+
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
 
@@ -1838,11 +1937,11 @@
       targetTiltX = ((e.clientY - centerY) / centerY) * -3.2;
       targetTiltY = ((e.clientX - centerX) / centerX) * 3.8;
 
-      // Specular glare coords
-      const cardRect = profileCard.getBoundingClientRect();
-      if (cardRect.width > 0 && cardRect.height > 0) {
-        glareX = ((e.clientX - cardRect.left) / cardRect.width) * 100;
-        glareY = ((e.clientY - cardRect.top) / cardRect.height) * 100;
+      // Specular glare coords using cached rect (no layout reflow!)
+      if (!cachedCardRect) updateCachedCardRect();
+      if (cachedCardRect && cachedCardRect.width > 0 && cachedCardRect.height > 0) {
+        glareX = ((e.clientX - cachedCardRect.left) / cachedCardRect.width) * 100;
+        glareY = ((e.clientY - cachedCardRect.top) / cachedCardRect.height) * 100;
       }
     });
 
@@ -1852,24 +1951,26 @@
     });
 
     function renderMacDuoPhysics() {
-      // Spring simulation
-      const forceX = (targetTiltX - currentTiltX) * springStiffness;
-      velocityX = (velocityX + forceX) * springDamping;
-      currentTiltX += velocityX;
+      // If actively selecting text with mouse down, pause transform updates to prevent Chromium selection lockup
+      if (!isSelectingText || !isMouseDown) {
+        const forceX = (targetTiltX - currentTiltX) * springStiffness;
+        velocityX = (velocityX + forceX) * springDamping;
+        currentTiltX += velocityX;
 
-      const forceY = (targetTiltY - currentTiltY) * springStiffness;
-      velocityY = (velocityY + forceY) * springDamping;
-      currentTiltY += velocityY;
+        const forceY = (targetTiltY - currentTiltY) * springStiffness;
+        velocityY = (velocityY + forceY) * springDamping;
+        currentTiltY += velocityY;
 
-      if (profileCard.classList.contains('active')) {
-        const isDockOpen = document.body.classList.contains('dock-open');
-        const baseShiftX = isDockOpen ? (window.innerWidth > 1100 ? -160 : (window.innerWidth > 860 ? -80 : 0)) : 0;
-        const baseScale = isDockOpen ? 0.96 : 1.0;
+        if (profileCard.classList.contains('active')) {
+          const isDockOpen = document.body.classList.contains('dock-open');
+          const baseShiftX = isDockOpen ? (window.innerWidth > 1100 ? -160 : (window.innerWidth > 860 ? -80 : 0)) : 0;
+          const baseScale = isDockOpen ? 0.96 : 1.0;
 
-        profileCard.style.transform = `translateX(${baseShiftX}px) perspective(1200px) rotateX(${currentTiltX.toFixed(2)}deg) rotateY(${currentTiltY.toFixed(2)}deg) scale(${baseScale})`;
-        
-        // Update specular depth glare
-        cardGlare.style.background = `radial-gradient(circle at ${glareX.toFixed(1)}% ${glareY.toFixed(1)}%, rgba(56, 189, 248, 0.16) 0%, transparent 65%)`;
+          profileCard.style.transform = `translateX(${baseShiftX}px) perspective(1200px) rotateX(${currentTiltX.toFixed(2)}deg) rotateY(${currentTiltY.toFixed(2)}deg) scale(${baseScale})`;
+          
+          // Update specular depth glare
+          cardGlare.style.background = `radial-gradient(circle at ${glareX.toFixed(1)}% ${glareY.toFixed(1)}%, rgba(56, 189, 248, 0.16) 0%, transparent 65%)`;
+        }
       }
 
       requestAnimationFrame(renderMacDuoPhysics);
@@ -2416,34 +2517,141 @@
     setInterval(fetchDiscordPresence, 30000);
 
     // -------------------------------------------------------------
-    // Meme DVD Screensaver Engine (Hits the exact corner every time!)
+    // Meme DVD Screensaver Engine (Interior Bouncing & Rampage Combos!)
     // -------------------------------------------------------------
     const dvdOverlay = document.getElementById('dvd-screensaver');
     const dvdLogo = document.getElementById('dvd-logo');
     const cornerToast = document.getElementById('corner-hit-toast');
+    const toastTitle = document.getElementById('toast-title');
+    const toastSub = document.getElementById('toast-sub');
 
     let dvdActive = false;
     let dvdX = 100, dvdY = 100;
-    let dvdSpeed = 5.2;
-    let dvdVx = 4.5, dvdVy = 3.8;
+    const dvdSpeed = 6.2;
+    let dvdVx = 4.2, dvdVy = 3.6;
     const dvdWidth = 120, dvdHeight = 60;
-    let dvdColors = ['#38bdf8', '#ec4899', '#22c55e', '#a855f7', '#f59e0b', '#06b6d4', '#e11d48', '#8b5cf6'];
-    let dvdColorIdx = 0;
     let dvdAnimFrame = null;
     let idleTimer = null;
-    const IDLE_LIMIT = 7000; // 7 seconds of inactivity
+    const IDLE_LIMIT = 7000;
 
-    const memeCornerPhrases = [
-      "🎯 CORNER HIT! 🎯",
-      "💥 100% SKILL (NO LUCK)",
-      "🔥 IMPOSSIBLE ANGLE!",
-      "⚡ FRAME PERFECT HIT!",
-      "👑 ABSOLUTE CINEMA"
-    ];
+    let cornerStreak = 0;
+    let currentRoute = [];
+    let dvdToastTimer = null;
 
-    function pickCornerTrajectory() {
-      const maxX = Math.max(10, window.innerWidth - dvdWidth);
-      const maxY = Math.max(10, window.innerHeight - dvdHeight);
+    // Iconic Kill Streak Tiers
+    const streakTiers = {
+      1: {
+        title: "🎯 CORNER HIT! 🎯",
+        sub: "1x COMBO • FIRST BLOOD",
+        voice: "First blood",
+        color: "#38bdf8"
+      },
+      2: {
+        title: "💥 DOUBLE KILL! 💥",
+        sub: "2x IN A ROW • SICK ANGLE",
+        voice: "Double kill",
+        color: "#22c55e"
+      },
+      3: {
+        title: "🔥 TRIPLE KILL! 🔥",
+        sub: "3x STREAK • UNSTOPPABLE!",
+        voice: "Triple kill",
+        color: "#f59e0b"
+      },
+      4: {
+        title: "⚡ ULTRA KILL! ⚡",
+        sub: "4x IN A ROW • GODLIKE!",
+        voice: "Ultra kill",
+        color: "#ec4899"
+      },
+      5: {
+        title: "👑 RAMPAGE! 👑",
+        sub: "5x CORNER GOD • UNREAL!",
+        voice: "Rampage",
+        color: "#a855f7"
+      },
+      6: {
+        title: "💀 MONSTER KILL! 💀",
+        sub: "6x STREAK • HOLY SHIT!",
+        voice: "Monster kill",
+        color: "#ef4444"
+      }
+    };
+
+    function playAnnouncerVoice(text) {
+      if (!window.speechSynthesis) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.95;
+        utterance.pitch = 0.58; // deep booming tournament announcer pitch
+        utterance.volume = 1.0;
+
+        const voices = window.speechSynthesis.getVoices();
+        const enVoice = voices.find(v => (v.lang.startsWith('en') || v.lang.startsWith('en-US')) && !v.name.includes('Compact')) || voices[0];
+        if (enVoice) utterance.voice = enVoice;
+
+        window.speechSynthesis.speak(utterance);
+      } catch (e) {}
+    }
+
+    function playStreakSound(streak) {
+      if (!sfxEnabled) return;
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+
+        if (streak === 1) {
+          playCyberSound('blip', 980);
+          setTimeout(() => playCyberSound('blip', 1320), 80);
+          setTimeout(() => playCyberSound('blip', 1760), 160);
+        } else if (streak === 2) {
+          [440, 554, 659, 880].forEach((freq, idx) => {
+            setTimeout(() => playCyberSound('blip', freq), idx * 55);
+          });
+        } else if (streak === 3) {
+          // Triple Kill brass blast
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.35);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.45);
+
+          setTimeout(() => playCyberSound('blip', 1320), 100);
+          setTimeout(() => playCyberSound('blip', 1760), 200);
+        } else if (streak >= 4) {
+          // Ultra Kill / Rampage mega explosion
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(160, now);
+          osc.frequency.exponentialRampToValueAtTime(32, now + 0.65);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.75);
+
+          [880, 1174, 1396, 1760, 2093].forEach((f, i) => {
+            setTimeout(() => playCyberSound('blip', f), 80 + i * 45);
+          });
+        }
+      } catch (e) {}
+    }
+
+    // Plan route that slices diagonally across the screen and bounces off 1-2 walls before corner!
+    function planInteriorRoute(startX, startY) {
+      const maxX = Math.max(20, window.innerWidth - dvdWidth);
+      const maxY = Math.max(20, window.innerHeight - dvdHeight);
+
       const corners = [
         { x: 0, y: 0 },
         { x: maxX, y: 0 },
@@ -2451,75 +2659,164 @@
         { x: maxX, y: maxY }
       ];
 
-      // Filter out corners that are too close
-      const candidates = corners.filter(c => Math.hypot(c.x - dvdX, c.y - dvdY) > 80);
-      const target = (candidates.length > 0 ? candidates : corners)[Math.floor(Math.random() * (candidates.length || corners.length))];
-      
-      const dx = target.x - dvdX;
-      const dy = target.y - dvdY;
-      const dist = Math.hypot(dx, dy);
+      // Targets: corners that are away from start (at least 250px away)
+      const validTargets = corners.filter(c => Math.hypot(c.x - startX, c.y - startY) > 250);
+      const target = (validTargets.length > 0 ? validTargets : corners)[Math.floor(Math.random() * (validTargets.length || corners.length))];
 
-      const steps = Math.max(65, Math.floor(dist / dvdSpeed));
-      dvdVx = dx / steps;
-      dvdVy = dy / steps;
-      return { target, steps };
+      const candidates = [];
+
+      // 1. Direct diagonal cross through center
+      const dxDir = target.x - startX;
+      const dyDir = target.y - startY;
+      if (Math.abs(dxDir) > 200 && Math.abs(dyDir) > 150) {
+        candidates.push([{ x: target.x, y: target.y, isCorner: true }]);
+      }
+
+      // 2. 1-bounce off horizontal wall (top y=0 or bottom y=maxY)
+      [0, maxY].forEach(wallY => {
+        const mirY = 2 * wallY - target.y;
+        const mirDx = target.x - startX;
+        const mirDy = mirY - startY;
+        if (mirDy !== 0) {
+          const t = (wallY - startY) / mirDy;
+          if (t > 0.15 && t < 0.85) {
+            const xHit = startX + mirDx * t;
+            if (xHit > 80 && xHit < maxX - 80) {
+              candidates.push([
+                { x: xHit, y: wallY, isCorner: false },
+                { x: target.x, y: target.y, isCorner: true }
+              ]);
+            }
+          }
+        }
+      });
+
+      // 3. 1-bounce off vertical wall (left x=0 or right x=maxX)
+      [0, maxX].forEach(wallX => {
+        const mirX = 2 * wallX - target.x;
+        const mirDx = mirX - startX;
+        const mirDy = target.y - startY;
+        if (mirDx !== 0) {
+          const t = (wallX - startX) / mirDx;
+          if (t > 0.15 && t < 0.85) {
+            const yHit = startY + mirDy * t;
+            if (yHit > 80 && yHit < maxY - 80) {
+              candidates.push([
+                { x: wallX, y: yHit, isCorner: false },
+                { x: target.x, y: target.y, isCorner: true }
+              ]);
+            }
+          }
+        }
+      });
+
+      if (candidates.length > 0) {
+        return candidates[Math.floor(Math.random() * candidates.length)];
+      }
+      return [{ x: target.x, y: target.y, isCorner: true }];
     }
 
-    let targetCornerGoal = null;
-
     function triggerCornerCelebration() {
-      dvdColorIdx = (dvdColorIdx + 1) % dvdColors.length;
-      const newColor = dvdColors[dvdColorIdx];
+      cornerStreak++;
+
+      const tierKey = Math.min(cornerStreak, 6);
+      const tier = streakTiers[tierKey] || {
+        title: `👑 RAMPAGE x${cornerStreak}! 👑`,
+        sub: `${cornerStreak}x CORNER GOD • BEYOND GODLIKE!`,
+        voice: "Holy Shit",
+        color: "#e11d48"
+      };
+
       if (dvdLogo) {
-        dvdLogo.style.color = newColor;
-        dvdLogo.style.boxShadow = `0 0 35px ${newColor}, inset 0 0 18px ${newColor}`;
+        dvdLogo.style.color = tier.color;
+        dvdLogo.style.boxShadow = `0 0 45px ${tier.color}, inset 0 0 22px ${tier.color}`;
       }
 
       if (cornerToast) {
-        const text = memeCornerPhrases[Math.floor(Math.random() * memeCornerPhrases.length)];
-        cornerToast.textContent = text;
-        cornerToast.style.borderColor = newColor;
-        cornerToast.style.boxShadow = `0 0 50px ${newColor}`;
+        if (toastTitle) toastTitle.textContent = tier.title;
+        if (toastSub) toastSub.textContent = tier.sub;
+        cornerToast.style.borderColor = tier.color;
+        cornerToast.style.boxShadow = `0 0 65px ${tier.color}`;
+
+        if (cornerStreak >= 3) {
+          cornerToast.classList.add('rampage');
+        } else {
+          cornerToast.classList.remove('rampage');
+        }
+
         cornerToast.classList.add('show');
-        setTimeout(() => {
-          cornerToast.classList.remove('show');
-        }, 1300);
+        clearTimeout(dvdToastTimer);
+        dvdToastTimer = setTimeout(() => {
+          cornerToast.classList.remove('show', 'rampage');
+        }, 1600);
       }
 
-      playCyberSound('blip', 980);
-      setTimeout(() => playCyberSound('blip', 1320), 80);
-      setTimeout(() => playCyberSound('blip', 1760), 160);
+      playStreakSound(cornerStreak);
+      playAnnouncerVoice(tier.voice);
+
+      // Spark explosion from the corner
+      for (let i = 0; i < 24; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const spd = Math.random() * 5 + 2;
+        cursorSparks.push({
+          x: dvdX + 60,
+          y: dvdY + 30,
+          vx: Math.cos(angle) * spd,
+          vy: Math.sin(angle) * spd,
+          size: Math.random() * 3 + 1.5,
+          alpha: 1.0,
+          decay: Math.random() * 0.02 + 0.015,
+          color: '56, 189, 248'
+        });
+      }
     }
 
     function stepDvd() {
       if (!dvdActive) return;
 
-      const maxX = Math.max(10, window.innerWidth - dvdWidth);
-      const maxY = Math.max(10, window.innerHeight - dvdHeight);
+      const maxX = Math.max(20, window.innerWidth - dvdWidth);
+      const maxY = Math.max(20, window.innerHeight - dvdHeight);
 
-      if (!targetCornerGoal) {
-        targetCornerGoal = pickCornerTrajectory();
+      if (!currentRoute || currentRoute.length === 0) {
+        currentRoute = planInteriorRoute(dvdX, dvdY);
       }
 
-      dvdX += dvdVx;
-      dvdY += dvdVy;
+      const waypoint = currentRoute[0];
+      const dx = waypoint.x - dvdX;
+      const dy = waypoint.y - dvdY;
+      const dist = Math.hypot(dx, dy);
 
-      // Check if reached corner within threshold or hit screen boundary
-      const distToTarget = Math.hypot(dvdX - targetCornerGoal.target.x, dvdY - targetCornerGoal.target.y);
-      const reachedTarget = distToTarget <= Math.max(Math.abs(dvdVx), Math.abs(dvdVy)) * 1.5;
-      const boundaryCorner = (dvdX <= 0 && dvdY <= 0) || 
-                             (dvdX >= maxX && dvdY <= 0) || 
-                             (dvdX <= 0 && dvdY >= maxY) || 
-                             (dvdX >= maxX && dvdY >= maxY);
+      if (dist <= dvdSpeed * 1.5) {
+        // Arrived at waypoint!
+        dvdX = waypoint.x;
+        dvdY = waypoint.y;
+        currentRoute.shift();
 
-      if (reachedTarget || boundaryCorner) {
-        // Precise pixel-perfect corner snap
-        dvdX = Math.max(0, Math.min(maxX, targetCornerGoal.target.x));
-        dvdY = Math.max(0, Math.min(maxY, targetCornerGoal.target.y));
-
-        triggerCornerCelebration();
-        targetCornerGoal = pickCornerTrajectory();
+        if (waypoint.isCorner) {
+          // HIT THE CORNER!
+          triggerCornerCelebration();
+          currentRoute = planInteriorRoute(dvdX, dvdY);
+        } else {
+          // Bounced off wall in the middle of screen
+          playCyberSound('blip', 540);
+          // Subtle color pulse on wall bounce
+          const wallColors = ['#38bdf8', '#06b6d4', '#60a5fa', '#818cf8'];
+          const randCol = wallColors[Math.floor(Math.random() * wallColors.length)];
+          if (dvdLogo) {
+            dvdLogo.style.color = randCol;
+            dvdLogo.style.boxShadow = `0 0 25px ${randCol}, inset 0 0 14px ${randCol}`;
+          }
+        }
+      } else {
+        dvdVx = (dx / dist) * dvdSpeed;
+        dvdVy = (dy / dist) * dvdSpeed;
+        dvdX += dvdVx;
+        dvdY += dvdVy;
       }
+
+      // Clamp inside screen bounds
+      dvdX = Math.max(0, Math.min(maxX, dvdX));
+      dvdY = Math.max(0, Math.min(maxY, dvdY));
 
       if (dvdLogo) {
         dvdLogo.style.transform = `translate3d(${dvdX.toFixed(1)}px, ${dvdY.toFixed(1)}px, 0)`;
@@ -2534,7 +2831,7 @@
       if (dvdOverlay) dvdOverlay.classList.add('active');
       dvdX = Math.floor(window.innerWidth / 2) - 60;
       dvdY = Math.floor(window.innerHeight / 2) - 30;
-      targetCornerGoal = pickCornerTrajectory();
+      currentRoute = planInteriorRoute(dvdX, dvdY);
       cancelAnimationFrame(dvdAnimFrame);
       dvdAnimFrame = requestAnimationFrame(stepDvd);
     }
@@ -2543,6 +2840,7 @@
       if (!dvdActive) return;
       if (window.location.href.includes('dvd')) return;
       dvdActive = false;
+      cornerStreak = 0; // reset kill streak on active exit
       if (dvdOverlay) dvdOverlay.classList.remove('active');
       cancelAnimationFrame(dvdAnimFrame);
     }
