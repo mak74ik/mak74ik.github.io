@@ -435,6 +435,76 @@
       cursor: grabbing !important;
     }
 
+    /* Procedural Glass Shards (Random shattered pieces) */
+    #dvd-shards-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 99992;
+    }
+
+    .dvd-shard-wrap {
+      position: absolute;
+      width: 120px;
+      height: 60px;
+      top: 0;
+      left: 0;
+      will-change: transform;
+      pointer-events: auto;
+      touch-action: none;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      filter: drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 6px rgba(56, 189, 248, 0.5));
+      transition: filter 0.15s ease;
+    }
+
+    .dvd-shard-wrap:hover {
+      filter: drop-shadow(0 0 2.5px #FFFFFF) drop-shadow(0 0 12px rgba(56, 189, 248, 0.9));
+    }
+
+    .dvd-shard-wrap.dragging {
+      cursor: grabbing !important;
+      z-index: 99999 !important;
+      filter: drop-shadow(0 0 3px #FFFFFF) drop-shadow(0 0 20px rgba(56, 189, 248, 1)) !important;
+    }
+
+    .dvd-shard-clipped {
+      width: 100%;
+      height: 100%;
+      pointer-events: auto;
+    }
+
+    .dvd-shard-inner {
+      position: absolute;
+      width: 120px;
+      height: 60px;
+      top: 0;
+      left: 0;
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      font-family: var(--font-main);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.06) 100%), rgba(10, 18, 36, 0.85);
+      backdrop-filter: blur(20px) saturate(200%);
+      -webkit-backdrop-filter: blur(20px) saturate(200%);
+      border: 1.5px solid rgba(255, 255, 255, 0.45);
+      box-shadow: 
+        inset 0 1.5px 2px rgba(255, 255, 255, 0.7),
+        inset 0 -1.5px 2px rgba(0, 0, 0, 0.5),
+        0 14px 32px rgba(0, 0, 0, 0.7);
+      color: #FFFFFF;
+      pointer-events: none;
+    }
+
     .dvd-crack-svg {
       position: absolute;
       top: 0;
@@ -1840,6 +1910,7 @@
         <path d="M 36 22 L 22 14 M 86 29 L 104 40 M 76 46 L 80 58" stroke="rgba(56,189,248,0.85)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
       </svg>
     </div>
+    <div id="dvd-shards-container"></div>
     <div id="corner-hit-toast" class="corner-hit-toast">
       <div id="toast-title" class="toast-title">🎯 CORNER HIT! 🎯</div>
       <div id="toast-sub" class="toast-sub">FIRST BLOOD • 1x STREAK</div>
@@ -2736,16 +2807,12 @@
     let targetCornerPoint = null;
     let dvdToastTimer = null;
 
-    // Ragdoll breaking & drag physics state
+    // Procedural Glass Shards & Ragdoll State
     let isDvdBroken = false;
     let dvdRotation = 0;
     let dvdRotVel = 0;
-    let isDraggingDvd = false;
-    let dragOffsetX = 0;
-    let dragOffsetY = 0;
-    let lastDragX = 0;
-    let lastDragY = 0;
-    let lastDragTime = 0;
+    let dvdShards = [];
+    const dvdShardsContainer = document.getElementById('dvd-shards-container');
 
     function playAnnouncerAudio(soundKey) {
       if (!sfxEnabled) return;
@@ -2898,6 +2965,265 @@
       }
     }
 
+    function generateGlassShards(w, h, impactX, impactY) {
+      const ox = Math.max(15, Math.min(w - 15, impactX ?? (w / 2 + (Math.random() - 0.5) * 40)));
+      const oy = Math.max(10, Math.min(h - 10, impactY ?? (h / 2 + (Math.random() - 0.5) * 20)));
+
+      // 7 to 9 radial cut angles with organic jitter
+      const numRays = Math.floor(Math.random() * 3) + 7;
+      const angles = [];
+      const baseStep = (Math.PI * 2) / numRays;
+      for (let i = 0; i < numRays; i++) {
+        const jitter = (Math.random() - 0.5) * (baseStep * 0.45);
+        angles.push(i * baseStep + jitter);
+      }
+      angles.sort((a, b) => a - b);
+
+      function rayBoxIntersect(theta) {
+        const cos = Math.cos(theta);
+        const sin = Math.sin(theta);
+        let tMin = Infinity;
+        if (cos > 1e-6) {
+          const t = (w - ox) / cos;
+          const y = oy + t * sin;
+          if (y >= -1 && y <= h + 1 && t < tMin) tMin = t;
+        }
+        if (cos < -1e-6) {
+          const t = (0 - ox) / cos;
+          const y = oy + t * sin;
+          if (y >= -1 && y <= h + 1 && t < tMin) tMin = t;
+        }
+        if (sin > 1e-6) {
+          const t = (h - oy) / sin;
+          const x = ox + t * cos;
+          if (x >= -1 && x <= w + 1 && t < tMin) tMin = t;
+        }
+        if (sin < -1e-6) {
+          const t = (0 - oy) / sin;
+          const x = ox + t * cos;
+          if (x >= -1 && x <= w + 1 && t < tMin) tMin = t;
+        }
+        return {
+          x: Math.max(0, Math.min(w, ox + tMin * cos)),
+          y: Math.max(0, Math.min(h, oy + tMin * sin))
+        };
+      }
+
+      const boundaryPoints = angles.map(a => rayBoxIntersect(a));
+      const corners = [
+        { x: 0, y: 0, a: Math.atan2(0 - oy, 0 - ox) },
+        { x: w, y: 0, a: Math.atan2(0 - oy, w - ox) },
+        { x: w, y: h, a: Math.atan2(h - oy, w - ox) },
+        { x: 0, y: h, a: Math.atan2(h - oy, 0 - ox) }
+      ];
+      corners.forEach(c => { if (c.a < 0) c.a += Math.PI * 2; });
+
+      const shards = [];
+      for (let i = 0; i < numRays; i++) {
+        const nextIdx = (i + 1) % numRays;
+        const a1 = angles[i];
+        const a2 = angles[nextIdx];
+        const p1 = boundaryPoints[i];
+        const p2 = boundaryPoints[nextIdx];
+
+        // Jittered ring cuts for natural glass fracture
+        const f1 = 0.35 + (Math.random() - 0.5) * 0.12;
+        const f2 = 0.35 + (Math.random() - 0.5) * 0.12;
+
+        const in1 = { x: ox + (p1.x - ox) * f1, y: oy + (p1.y - oy) * f1 };
+        const in2 = { x: ox + (p2.x - ox) * f2, y: oy + (p2.y - oy) * f2 };
+
+        // Shard 1: Inner sharp shard
+        shards.push({
+          pts: [{ x: ox, y: oy }, in1, in2]
+        });
+
+        // Corners falling between these two rays
+        const inBetweenCorners = corners.filter(c => {
+          let ca = c.a;
+          if (a1 < a2) return ca > a1 && ca < a2;
+          return ca > a1 || ca < a2;
+        });
+
+        // Shard 2: Outer body shard
+        shards.push({
+          pts: [in1, p1, ...inBetweenCorners, p2, in2]
+        });
+      }
+
+      return shards;
+    }
+
+    function breakDvd(e) {
+      if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+      if (!dvdActive || isDvdBroken) return;
+      isDvdBroken = true;
+
+      // Hide the intact DVD
+      if (dvdLogo) {
+        dvdLogo.style.display = 'none';
+      }
+
+      // Play authentic crystal glass shatter sound
+      playCyberSound('glass_shatter');
+
+      // Calculate impact point relative to DVD
+      let ox = 60, oy = 30;
+      if (e && typeof e.clientX === 'number') {
+        ox = Math.max(12, Math.min(dvdWidth - 12, e.clientX - dvdX));
+        oy = Math.max(8, Math.min(dvdHeight - 8, e.clientY - dvdY));
+      } else {
+        ox = dvdWidth / 2 + (Math.random() - 0.5) * 30;
+        oy = dvdHeight / 2 + (Math.random() - 0.5) * 15;
+      }
+
+      // Generate procedural glass shards
+      const shardDefs = generateGlassShards(dvdWidth, dvdHeight, ox, oy);
+      dvdShards = [];
+
+      if (dvdShardsContainer) {
+        dvdShardsContainer.innerHTML = '';
+      }
+
+      shardDefs.forEach((def) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'dvd-shard-wrap';
+        wrap.style.transform = `translate3d(${dvdX.toFixed(1)}px, ${dvdY.toFixed(1)}px, 0) rotate(${dvdRotation.toFixed(1)}deg)`;
+
+        const ptsStr = def.pts.map(p => `${p.x.toFixed(1)}px ${p.y.toFixed(1)}px`).join(', ');
+        wrap.innerHTML = `
+          <div class="dvd-shard-clipped" style="clip-path: polygon(${ptsStr});">
+            <div class="dvd-shard-inner">
+              <div class="dvd-text">DVD</div>
+              <div class="dvd-sub">VIDEO</div>
+            </div>
+          </div>
+        `;
+
+        if (dvdShardsContainer) {
+          dvdShardsContainer.appendChild(wrap);
+        }
+
+        // Calculate centroid and explosive impulse outward from impact
+        const cx = def.pts.reduce((sum, p) => sum + p.x, 0) / def.pts.length;
+        const cy = def.pts.reduce((sum, p) => sum + p.y, 0) / def.pts.length;
+        const dx = cx - ox;
+        const dy = cy - oy;
+        const dist = Math.hypot(dx, dy) + 0.1;
+        const dirX = dx / dist;
+        const dirY = dy / dist;
+        const burstSpeed = Math.random() * 8 + 5 + (1.0 - Math.min(1, dist / 70)) * 4;
+
+        const shardObj = {
+          wrapEl: wrap,
+          x: dvdX,
+          y: dvdY,
+          vx: dirX * burstSpeed + (Math.random() - 0.5) * 4 + dvdVx * 0.45,
+          vy: dirY * burstSpeed - Math.random() * 8 - 4 + dvdVy * 0.45,
+          rot: dvdRotation,
+          rotVel: (Math.random() - 0.5) * 36,
+          restitution: 0.34 + Math.random() * 0.22,
+          friction: 0.76 + Math.random() * 0.1,
+          isDragging: false,
+          dragOffsetX: 0,
+          dragOffsetY: 0,
+          lastX: 0,
+          lastY: 0,
+          lastTime: 0
+        };
+
+        // Pointer drag & fling event handlers for EACH shard
+        wrap.addEventListener('pointerdown', (pe) => {
+          pe.stopPropagation();
+          pe.preventDefault();
+          initAudio();
+          shardObj.isDragging = true;
+          try { wrap.setPointerCapture(pe.pointerId); } catch (_) {}
+          wrap.classList.add('dragging');
+          shardObj.dragOffsetX = pe.clientX - shardObj.x;
+          shardObj.dragOffsetY = pe.clientY - shardObj.y;
+          shardObj.lastX = pe.clientX;
+          shardObj.lastY = pe.clientY;
+          shardObj.lastTime = performance.now();
+          shardObj.vx = 0;
+          shardObj.vy = 0;
+          shardObj.rotVel = 0;
+        });
+
+        wrap.addEventListener('pointermove', (pe) => {
+          if (!shardObj.isDragging) return;
+          pe.stopPropagation();
+          pe.preventDefault();
+          const now = performance.now();
+          const dt = Math.max(1, now - shardObj.lastTime);
+          const vx = ((pe.clientX - shardObj.lastX) / dt) * 16.67;
+          const vy = ((pe.clientY - shardObj.lastY) / dt) * 16.67;
+          shardObj.vx = shardObj.vx * 0.35 + vx * 0.65;
+          shardObj.vy = shardObj.vy * 0.35 + vy * 0.65;
+          shardObj.lastX = pe.clientX;
+          shardObj.lastY = pe.clientY;
+          shardObj.lastTime = now;
+          shardObj.rot += (vx * 0.7);
+
+          shardObj.x = pe.clientX - shardObj.dragOffsetX;
+          shardObj.y = pe.clientY - shardObj.dragOffsetY;
+          wrap.style.transform = `translate3d(${shardObj.x.toFixed(1)}px, ${shardObj.y.toFixed(1)}px, 0) rotate(${shardObj.rot.toFixed(1)}deg)`;
+
+          if (Math.hypot(vx, vy) > 7 && Math.random() < 0.35) {
+            cursorSparks.push({
+              x: pe.clientX,
+              y: pe.clientY,
+              vx: (Math.random() - 0.5) * 4,
+              vy: (Math.random() - 0.5) * 4,
+              size: 2,
+              alpha: 0.8,
+              decay: 0.04,
+              color: '56, 189, 248'
+            });
+          }
+        });
+
+        const releaseShard = (pe) => {
+          if (!shardObj.isDragging) return;
+          shardObj.isDragging = false;
+          try { wrap.releasePointerCapture(pe.pointerId); } catch (_) {}
+          wrap.classList.remove('dragging');
+          shardObj.vx = Math.max(-28, Math.min(28, shardObj.vx * 1.25));
+          shardObj.vy = Math.max(-28, Math.min(28, shardObj.vy * 1.25));
+          shardObj.rotVel = shardObj.vx * 1.8;
+          if (Math.hypot(shardObj.vx, shardObj.vy) > 5) {
+            playCyberSound('blip', 380);
+          }
+        };
+
+        wrap.addEventListener('pointerup', releaseShard);
+        wrap.addEventListener('pointercancel', releaseShard);
+
+        dvdShards.push(shardObj);
+      });
+
+      // Explode 45+ glass particles into cursorSparks
+      for (let i = 0; i < 45; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const spd = Math.random() * 9 + 2;
+        cursorSparks.push({
+          x: dvdX + ox,
+          y: dvdY + oy,
+          vx: Math.cos(angle) * spd,
+          vy: Math.sin(angle) * spd,
+          size: Math.random() * 3 + 1,
+          alpha: 1.0,
+          decay: Math.random() * 0.02 + 0.015,
+          color: Math.random() > 0.4 ? '56, 189, 248' : '255, 255, 255'
+        });
+      }
+
+      showToast('💥 DVD SHATTERED INTO SHARDS!');
+    }
+
     function stepDvd() {
       if (!dvdActive) return;
 
@@ -2905,70 +3231,68 @@
       const maxY = Math.max(20, window.innerHeight - dvdHeight);
 
       if (isDvdBroken) {
-        if (!isDraggingDvd) {
-          // Ragdoll Physics: gravity, velocity, floor/wall bounces, friction, rotational tumble
-          dvdVy += 0.82; // gravity pull
-          dvdVx *= 0.992; // air friction
-          dvdVy *= 0.992;
-          dvdX += dvdVx;
-          dvdY += dvdVy;
-          dvdRotation += dvdRotVel;
+        const floorY = Math.max(20, window.innerHeight - 55);
+        const wallX = Math.max(20, window.innerWidth - 75);
+
+        for (let i = 0; i < dvdShards.length; i++) {
+          const s = dvdShards[i];
+          if (s.isDragging) continue;
+
+          // Gravity pull & air resistance
+          s.vy += 0.82;
+          s.vx *= 0.993;
+          s.vy *= 0.993;
+          s.x += s.vx;
+          s.y += s.vy;
+          s.rot += s.rotVel;
 
           // Floor collision
-          if (dvdY >= maxY) {
-            dvdY = maxY;
-            if (Math.abs(dvdVy) > 1.2) {
-              dvdVy = -dvdVy * 0.45; // restitution
-              dvdVx *= 0.78;         // floor friction
-              dvdRotVel *= 0.65;     // angular friction
-              playCyberSound('glass_thud');
-
-              if (Math.abs(dvdVy) > 3) {
-                for (let i = 0; i < 4; i++) {
-                  cursorSparks.push({
-                    x: dvdX + 60,
-                    y: maxY + 20,
-                    vx: (Math.random() - 0.5) * 5,
-                    vy: -Math.random() * 4 - 1,
-                    size: 2,
-                    alpha: 0.9,
-                    decay: 0.04,
-                    color: '56, 189, 248'
-                  });
-                }
+          if (s.y >= floorY) {
+            s.y = floorY;
+            if (Math.abs(s.vy) > 1.2) {
+              s.vy = -s.vy * s.restitution;
+              s.vx *= s.friction;
+              s.rotVel *= 0.65;
+              if (Math.abs(s.vy) > 2.5 && Math.random() < 0.25) {
+                playCyberSound('glass_thud');
+                cursorSparks.push({
+                  x: s.x + 60,
+                  y: floorY + 20,
+                  vx: (Math.random() - 0.5) * 4,
+                  vy: -Math.random() * 3 - 1,
+                  size: 2,
+                  alpha: 0.8,
+                  decay: 0.04,
+                  color: '56, 189, 248'
+                });
               }
             } else {
-              dvdVy = 0;
-              dvdVx *= 0.8;
-              dvdRotVel *= 0.7;
-              if (Math.abs(dvdVx) < 0.05) dvdVx = 0;
-              if (Math.abs(dvdRotVel) < 0.05) dvdRotVel = 0;
+              s.vy = 0;
+              s.vx *= 0.8;
+              s.rotVel *= 0.7;
+              if (Math.abs(s.vx) < 0.05) s.vx = 0;
+              if (Math.abs(s.rotVel) < 0.05) s.rotVel = 0;
             }
           }
 
           // Ceiling collision
-          if (dvdY <= 0) {
-            dvdY = 0;
-            dvdVy = Math.abs(dvdVy) * 0.5;
-            playCyberSound('glass_thud');
+          if (s.y <= -10) {
+            s.y = -10;
+            s.vy = Math.abs(s.vy) * 0.5;
           }
 
           // Wall collisions
-          if (dvdX <= 0) {
-            dvdX = 0;
-            dvdVx = Math.abs(dvdVx) * 0.55;
-            dvdRotVel = -dvdRotVel * 0.7;
-            playCyberSound('glass_thud');
-          } else if (dvdX >= maxX) {
-            dvdX = maxX;
-            dvdVx = -Math.abs(dvdVx) * 0.55;
-            dvdRotVel = -dvdRotVel * 0.7;
-            playCyberSound('glass_thud');
+          if (s.x <= -20) {
+            s.x = -20;
+            s.vx = Math.abs(s.vx) * 0.55;
+            s.rotVel = -s.rotVel * 0.7;
+          } else if (s.x >= wallX) {
+            s.x = wallX;
+            s.vx = -Math.abs(s.vx) * 0.55;
+            s.rotVel = -s.rotVel * 0.7;
           }
 
-          if (dvdLogo) {
-            dvdLogo.style.transform = `translate3d(${dvdX.toFixed(1)}px, ${dvdY.toFixed(1)}px, 0) rotate(${dvdRotation.toFixed(1)}deg)`;
-          }
+          s.wrapEl.style.transform = `translate3d(${s.x.toFixed(1)}px, ${s.y.toFixed(1)}px, 0) rotate(${s.rot.toFixed(1)}deg)`;
         }
 
         dvdAnimFrame = requestAnimationFrame(stepDvd);
@@ -3069,137 +3393,6 @@
       dvdAnimFrame = requestAnimationFrame(stepDvd);
     }
 
-    function breakDvd(e) {
-      if (e) {
-        e.stopPropagation();
-        e.preventDefault();
-      }
-      if (!dvdActive) return;
-
-      if (!isDvdBroken) {
-        isDvdBroken = true;
-        if (dvdLogo) dvdLogo.classList.add('broken');
-
-        // Play crystal fracture sound
-        playCyberSound('glass_shatter');
-
-        // Initial launch & tumble impulse
-        dvdVx = (Math.random() - 0.5) * 10;
-        dvdVy = -Math.random() * 6 - 4; // slight pop up before falling
-        dvdRotVel = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 12 + 8);
-
-        // Explode glass shards into cursorSparks
-        for (let i = 0; i < 36; i++) {
-          const angle = Math.random() * Math.PI * 2;
-          const spd = Math.random() * 8 + 2;
-          cursorSparks.push({
-            x: dvdX + 60,
-            y: dvdY + 30,
-            vx: Math.cos(angle) * spd,
-            vy: Math.sin(angle) * spd,
-            size: Math.random() * 3 + 1,
-            alpha: 1.0,
-            decay: Math.random() * 0.02 + 0.015,
-            color: '255, 255, 255'
-          });
-        }
-
-        showToast('💥 DVD SHATTERED!');
-      }
-    }
-
-    function onDvdPointerDown(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      initAudio();
-
-      if (!isDvdBroken) {
-        breakDvd(e);
-        return;
-      }
-
-      isDraggingDvd = true;
-      try {
-        dvdLogo.setPointerCapture(e.pointerId);
-      } catch (err) {}
-      dvdLogo.classList.add('dragging');
-
-      dragOffsetX = e.clientX - dvdX;
-      dragOffsetY = e.clientY - dvdY;
-      lastDragX = e.clientX;
-      lastDragY = e.clientY;
-      lastDragTime = performance.now();
-      dvdVx = 0;
-      dvdVy = 0;
-      dvdRotVel = 0;
-    }
-
-    function onDvdPointerMove(e) {
-      if (!isDraggingDvd) return;
-      e.stopPropagation();
-      e.preventDefault();
-
-      const now = performance.now();
-      const dt = Math.max(1, now - lastDragTime);
-
-      const newX = e.clientX - dragOffsetX;
-      const newY = e.clientY - dragOffsetY;
-
-      // Track throw velocity (normalized to 60fps frame delta)
-      const vx = ((e.clientX - lastDragX) / dt) * 16.67;
-      const vy = ((e.clientY - lastDragY) / dt) * 16.67;
-
-      dvdVx = dvdVx * 0.35 + vx * 0.65;
-      dvdVy = dvdVy * 0.35 + vy * 0.65;
-
-      lastDragX = e.clientX;
-      lastDragY = e.clientY;
-      lastDragTime = now;
-
-      // Dynamic tilt based on horizontal drag
-      dvdRotation += (vx * 0.6);
-
-      const maxX = Math.max(20, window.innerWidth - dvdWidth);
-      const maxY = Math.max(20, window.innerHeight - dvdHeight);
-      dvdX = Math.max(0, Math.min(maxX, newX));
-      dvdY = Math.max(0, Math.min(maxY, newY));
-
-      if (dvdLogo) {
-        dvdLogo.style.transform = `translate3d(${dvdX.toFixed(1)}px, ${dvdY.toFixed(1)}px, 0) rotate(${dvdRotation.toFixed(1)}deg)`;
-      }
-
-      if (Math.hypot(vx, vy) > 8 && Math.random() < 0.4) {
-        cursorSparks.push({
-          x: dvdX + 60,
-          y: dvdY + 30,
-          vx: (Math.random() - 0.5) * 4,
-          vy: (Math.random() - 0.5) * 4,
-          size: 2,
-          alpha: 0.8,
-          decay: 0.04,
-          color: '56, 189, 248'
-        });
-      }
-    }
-
-    function onDvdPointerUp(e) {
-      if (!isDraggingDvd) return;
-      isDraggingDvd = false;
-      try {
-        dvdLogo.releasePointerCapture(e.pointerId);
-      } catch (err) {}
-      dvdLogo.classList.remove('dragging');
-
-      // Throw momentum
-      dvdVx = Math.max(-28, Math.min(28, dvdVx * 1.15));
-      dvdVy = Math.max(-28, Math.min(28, dvdVy * 1.15));
-      dvdRotVel = dvdVx * 1.8;
-
-      if (Math.hypot(dvdVx, dvdVy) > 6) {
-        playCyberSound('blip', 320);
-      }
-    }
-
     function startDvdScreensaver() {
       if (dvdActive || isDvdBroken) return; // NEVER REAPPEAR ONCE BROKEN!
       dvdActive = true;
@@ -3238,16 +3431,15 @@
     }
 
     if (dvdLogo) {
-      dvdLogo.addEventListener('pointerdown', onDvdPointerDown);
-      dvdLogo.addEventListener('pointermove', onDvdPointerMove);
-      dvdLogo.addEventListener('pointerup', onDvdPointerUp);
-      dvdLogo.addEventListener('pointercancel', onDvdPointerUp);
+      dvdLogo.addEventListener('pointerdown', (e) => {
+        breakDvd(e);
+      });
     }
 
     if (dvdOverlay) {
       dvdOverlay.addEventListener('pointerdown', (e) => {
-        // Exit screensaver ONLY when tapping/clicking on the screen outside the DVD logo
-        if (e.target.closest('#dvd-logo')) return;
+        // Exit screensaver ONLY when tapping/clicking on the screen outside the DVD logo and outside any shards
+        if (e.target.closest('#dvd-logo') || e.target.closest('.dvd-shard-wrap')) return;
         stopDvdScreensaver();
       });
     }
