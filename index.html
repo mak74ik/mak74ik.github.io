@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta name="theme-color" content="#0a0a0c">
+  <meta name="theme-color" content="#08080a">
   <title>Yoshi</title>
   
   <!-- Open Graph & Meta -->
@@ -38,13 +38,14 @@
       --font-mono: 'JetBrains Mono', monospace;
       --theme-color: #404040;
       --accent-color: #F97316;
-      --accent-glow: rgba(249, 115, 22, 0.25);
+      --accent-glow: rgba(249, 115, 22, 0.35);
       --text-main: #FFFFFF;
       --text-muted: #A8A29E;
       --card-bg: rgba(20, 14, 18, 0.58);
       --card-border: rgba(140, 125, 125, 0.22);
       --card-blur: 28px;
       --card-radius: 26px;
+      --drawer-width: 380px;
     }
 
     * {
@@ -80,11 +81,11 @@
       width: 600px;
       height: 600px;
       border-radius: 50%;
-      filter: blur(120px);
+      filter: blur(130px);
       pointer-events: none;
       z-index: 1;
       opacity: 0.18;
-      animation: floatGlow 12s ease-in-out infinite alternate;
+      animation: floatGlow 14s ease-in-out infinite alternate;
     }
 
     .glow-1 {
@@ -97,7 +98,7 @@
       bottom: 10%;
       right: 15%;
       background: #ea580c;
-      animation-delay: -6s;
+      animation-delay: -7s;
     }
 
     @keyframes floatGlow {
@@ -112,7 +113,7 @@
       }
     }
 
-    /* Subtle Grid / Noise Overlay */
+    /* Subtle Grid Overlay */
     .grid-overlay {
       position: fixed;
       top: 0;
@@ -135,7 +136,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 50;
+      z-index: 100;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -187,6 +188,7 @@
       align-items: center;
       justify-content: center;
       padding: 40px 16px;
+      transition: padding 0.55s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .profile-card {
@@ -201,12 +203,20 @@
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 40px rgba(0, 0, 0, 0.5);
       opacity: 0;
       transform: translateY(30px);
-      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: 
+        opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform;
     }
 
     .profile-card.active {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    /* SHIFT LEFT WHEN DOCK IS OPEN */
+    body.dock-open .profile-card.active {
+      transform: translateX(-160px);
     }
 
     /* Card Top Header: Avatar + Nick + Badges */
@@ -341,54 +351,9 @@
       margin-top: 6px;
     }
 
-    /* Social Links Grid */
-    .social-links {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 12px;
-      margin-top: 22px;
-      flex-wrap: wrap;
-    }
-
-    .social-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 18px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 14px;
-      color: #FFFFFF;
-      text-decoration: none;
-      font-size: 0.82rem;
-      font-weight: 500;
-      transition: all 0.25s ease;
-      backdrop-filter: blur(8px);
-    }
-
-    .social-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: var(--accent-color);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px var(--accent-glow);
-    }
-
-    .social-btn svg {
-      width: 18px;
-      height: 18px;
-      fill: var(--accent-color);
-      transition: transform 0.2s ease;
-    }
-
-    .social-btn:hover svg {
-      transform: scale(1.1);
-    }
-
     /* Discord Mini-Card */
     .discord-card {
-      margin-top: 24px;
+      margin-top: 20px;
       display: flex;
       align-items: center;
       gap: 16px;
@@ -454,157 +419,328 @@
     }
 
     /* =========================================================
-       RIGHT SIDE FLOATING PROJECT SWITCHER (DOCK)
+       RIGHT EDGE TRIGGER TAB (PULSING CHEVRON)
        ========================================================= */
-    .projects-dock {
+    .right-edge-trigger {
       position: fixed;
-      right: 28px;
+      right: 0;
       top: 50%;
       transform: translateY(-50%);
-      z-index: 40;
+      z-index: 45;
       display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: rgba(18, 14, 18, 0.65);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      align-items: center;
+      gap: 8px;
+      padding: 14px 10px 14px 14px;
+      background: rgba(24, 18, 24, 0.75);
       border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 20px;
-      padding: 12px 10px;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 0, 0, 0.4);
+      border-right: none;
+      border-radius: 20px 0 0 20px;
+      cursor: pointer;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: -4px 0 25px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .dock-title {
-      font-size: 0.65rem;
+    .right-edge-trigger:hover {
+      background: rgba(35, 25, 35, 0.9);
+      border-color: var(--accent-color);
+      transform: translateY(-50%) translateX(-4px);
+      box-shadow: -6px 0 30px var(--accent-glow);
+    }
+
+    body.dock-open .right-edge-trigger {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-50%) translateX(20px);
+    }
+
+    .trigger-chevron {
+      width: 18px;
+      height: 18px;
+      fill: var(--accent-color);
+      animation: bounceLeft 1.8s ease-in-out infinite;
+    }
+
+    @keyframes bounceLeft {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(-4px); }
+    }
+
+    .trigger-text {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #FFFFFF;
+    }
+
+    /* Transparent Click Zone along the entire right edge */
+    .right-click-zone {
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 48px;
+      height: 100%;
+      z-index: 40;
+      cursor: pointer;
+    }
+
+    body.dock-open .right-click-zone {
+      display: none;
+    }
+
+    /* =========================================================
+       FLY-OUT PROJECTS & LINKS DRAWER (RIGHT PANEL)
+       ========================================================= */
+    .projects-drawer {
+      position: fixed;
+      right: 0;
+      top: 0;
+      height: 100%;
+      width: var(--drawer-width);
+      z-index: 60;
+      background: rgba(16, 11, 15, 0.88);
+      backdrop-filter: blur(35px);
+      -webkit-backdrop-filter: blur(35px);
+      border-left: 1.5px solid rgba(255, 255, 255, 0.12);
+      box-shadow: -15px 0 50px rgba(0, 0, 0, 0.7);
+      transform: translateX(105%);
+      transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      padding: 32px 24px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    body.dock-open .projects-drawer {
+      transform: translateX(0);
+    }
+
+    /* Drawer Header */
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .drawer-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .drawer-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -0.01em;
+    }
+
+    .drawer-subtitle {
+      font-size: 0.7rem;
+      color: var(--accent-color);
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .drawer-close-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #FFFFFF;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .drawer-close-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent-color);
+      transform: scale(1.08) rotate(90deg);
+    }
+
+    .drawer-close-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    /* Section Headers */
+    .dock-section-title {
+      font-size: 0.68rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.12em;
-      color: var(--accent-color);
-      text-align: center;
-      padding-bottom: 4px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      margin-bottom: 4px;
+      color: var(--text-muted);
+      margin: 14px 0 10px 4px;
+    }
+
+    /* =========================================================
+       macOS DOCK WITH WAVE MAGNIFICATION EFFECT
+       ========================================================= */
+    .macos-dock {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 6px 4px;
     }
 
     .dock-item {
       position: relative;
       display: flex;
       align-items: center;
-      justify-content: center;
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.04);
+      gap: 16px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.035);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      color: #FFFFFF;
+      border-radius: 18px;
       text-decoration: none;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      color: #FFFFFF;
+      transform-origin: center right;
+      transition: 
+        transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+      will-change: transform;
     }
 
     .dock-item:hover {
-      background: rgba(249, 115, 22, 0.15);
+      background: rgba(249, 115, 22, 0.12);
       border-color: var(--accent-color);
-      transform: scale(1.08) translateX(-4px);
-      box-shadow: 0 4px 18px var(--accent-glow);
+      box-shadow: 0 8px 24px var(--accent-glow);
     }
 
-    .dock-item svg {
+    .dock-icon-box {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .dock-item:hover .dock-icon-box {
+      background: rgba(249, 115, 22, 0.2);
+      border-color: var(--accent-color);
+      transform: scale(1.1);
+    }
+
+    .dock-icon-box svg {
       width: 22px;
       height: 22px;
       fill: #FFFFFF;
       transition: fill 0.2s ease;
     }
 
-    .dock-item:hover svg {
+    .dock-item:hover .dock-icon-box svg {
       fill: var(--accent-color);
     }
 
-    /* Flyout Tooltip to the Left */
-    .dock-tooltip {
-      position: absolute;
-      right: 56px;
-      top: 50%;
-      transform: translateY(-50%) scale(0.95);
-      background: rgba(15, 12, 16, 0.95);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 12px;
-      padding: 8px 14px;
-      white-space: nowrap;
-      pointer-events: none;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    .dock-details {
       display: flex;
       flex-direction: column;
       gap: 2px;
+      min-width: 0;
+      flex: 1;
     }
 
-    .dock-tooltip-title {
-      font-size: 0.8rem;
+    .dock-name {
+      font-size: 0.88rem;
       font-weight: 600;
       color: #FFFFFF;
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: space-between;
     }
 
-    .dock-tooltip-title svg {
-      width: 12px;
-      height: 12px;
+    .dock-arrow {
+      width: 13px;
+      height: 13px;
+      fill: var(--text-muted);
+      opacity: 0.6;
+      transition: all 0.2s ease;
+    }
+
+    .dock-item:hover .dock-arrow {
       fill: var(--accent-color);
+      opacity: 1;
+      transform: translateX(3px);
     }
 
-    .dock-tooltip-desc {
-      font-size: 0.7rem;
+    .dock-desc {
+      font-size: 0.72rem;
       color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .dock-item:hover .dock-tooltip {
+    /* Backdrop dim for mobile or focus */
+    .drawer-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 55;
+      background: rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.4s ease, visibility 0.4s;
+    }
+
+    body.dock-open .drawer-backdrop {
       opacity: 1;
       visibility: visible;
-      transform: translateY(-50%) scale(1);
+      pointer-events: auto;
     }
 
-    /* Mobile Responsive */
+    /* Responsive */
+    @media (max-width: 1100px) {
+      body.dock-open .profile-card.active {
+        transform: translateX(-80px);
+      }
+    }
+
     @media (max-width: 860px) {
-      .main-wrapper {
-        padding-bottom: 90px;
+      body.dock-open .profile-card.active {
+        transform: translateY(0);
       }
-      .projects-dock {
-        right: auto;
-        left: 50%;
-        top: auto;
-        bottom: 16px;
-        transform: translateX(-50%);
-        flex-direction: row;
-        border-radius: 9999px;
-        padding: 6px 10px;
-        gap: 8px;
-        background: rgba(18, 14, 18, 0.85);
+      :root {
+        --drawer-width: 320px;
       }
-      .dock-title {
-        display: none;
+      .right-edge-trigger {
+        padding: 10px 6px 10px 10px;
       }
-      .dock-item {
-        width: 40px;
-        height: 40px;
-      }
-      .dock-tooltip {
-        right: auto;
-        left: 50%;
-        top: -46px;
-        transform: translateX(-50%) scale(0.95);
-      }
-      .dock-item:hover .dock-tooltip {
-        transform: translateX(-50%) scale(1);
+      .trigger-text {
+        font-size: 0.6rem;
       }
     }
 
     @media (max-width: 480px) {
+      :root {
+        --drawer-width: 88%;
+      }
       .profile-card {
         padding: 24px 20px;
-        margin-bottom: 70px;
       }
       .card-top {
         gap: 16px;
@@ -615,10 +751,6 @@
       }
       .username {
         font-size: 1.35rem;
-      }
-      .social-btn {
-        padding: 8px 14px;
-        font-size: 0.78rem;
       }
     }
   </style>
@@ -640,7 +772,21 @@
     <div class="reveal-text">click to fuck Yoshi</div>
   </div>
 
-  <!-- Main Profile Content -->
+  <!-- Transparent Right Click Zone (Entire right side clickable) -->
+  <div id="right-click-zone" class="right-click-zone" title="Click to open Projects & Links"></div>
+
+  <!-- Right Edge Indicator Tab -->
+  <div id="dock-toggle-tab" class="right-edge-trigger" title="Open Projects & Links">
+    <svg class="trigger-chevron" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    <span class="trigger-text">PROJECTS</span>
+  </div>
+
+  <!-- Drawer Backdrop (Clicking anywhere outside closes drawer) -->
+  <div id="drawer-backdrop" class="drawer-backdrop"></div>
+
+  <!-- =========================================================
+       MAIN PROFILE CARD
+       ========================================================= -->
   <div class="main-wrapper">
     <div id="profile-card" class="profile-card">
       
@@ -698,41 +844,6 @@
       <!-- Footer Quote -->
       <div class="footer-note">©spokoynich</div>
 
-      <!-- Social Links -->
-      <div class="social-links">
-        <!-- Steam -->
-        <a href="https://steamcommunity.com/id/bribable/" target="_blank" rel="noopener noreferrer" class="social-btn">
-          <svg viewBox="0 0 24 24">
-            <path d="M24 12c0 6.627-5.373 12-12 12-5.782 0-10.608-4.091-11.744-9.537l4.764 2.003c.285 1.441 1.56 2.547 3.115 2.534 1.723-.017 3.105-1.414 3.116-3.129l.007-.003 3.602-2.684c2.304.024 4.14-1.833 4.14-4.091 0-2.26-1.834-4.093-4.093-4.093-2.234 0-4.048 1.791-4.09 4.015l-2.64 3.693c-.668-.014-1.269.169-1.791.51l-6.294-2.646c.708-5.953 5.765-10.572 11.908-10.572 6.627 0 12 5.373 12 12zm-16.577 5.477l-1.544-.649c.38.858 1.236 1.461 2.249 1.457 1.346-.012 2.422-1.11 2.41-2.455-.012-1.329-1.104-2.41-2.432-2.41-.287.001-.57.05-.86.16l1.542.648c.898.378 1.319 1.411.941 2.308-.376.896-1.409 1.318-2.306.941zm7.484-5.602c-1.533 0-2.781-1.249-2.781-2.782 0-1.534 1.248-2.782 2.781-2.782 1.534 0 2.781 1.248 2.781 2.782 0 1.533-1.247 2.782-2.781 2.782zm0-.682c1.159 0 2.1-.942 2.1-2.101 0-1.158-.94-2.102-2.1-2.102s-2.102.943-2.102 2.102c.001 1.159.943 2.101 2.102 2.101z"></path>
-          </svg>
-          <span>Steam</span>
-        </a>
-
-        <!-- TikTok -->
-        <a href="https://www.tiktok.com/@mizyqqa" target="_blank" rel="noopener noreferrer" class="social-btn">
-          <svg viewBox="0 0 24 24">
-            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"></path>
-          </svg>
-          <span>TikTok</span>
-        </a>
-
-        <!-- Telegram -->
-        <a href="https://t.me/+g8HlBBrRy7EwNGMy" target="_blank" rel="noopener noreferrer" class="social-btn">
-          <svg viewBox="0 0 24 24">
-            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"></path>
-          </svg>
-          <span>Telegram</span>
-        </a>
-
-        <!-- Spotify -->
-        <a href="https://open.spotify.com/user/31pe6cdbjwwqstyw4esshin6depa?si=0eee13eab1794490" target="_blank" rel="noopener noreferrer" class="social-btn">
-          <svg viewBox="0 0 24 24">
-            <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"></path>
-          </svg>
-          <span>Spotify</span>
-        </a>
-      </div>
-
       <!-- Discord Presence Card -->
       <div class="discord-card">
         <div class="discord-avatar-wrap">
@@ -749,80 +860,159 @@
   </div>
 
   <!-- =========================================================
-       RIGHT SIDE FLOATING PROJECT SWITCHER
+       FLY-OUT macOS DOCK (PROJECTS & SOCIAL LINKS DRAWER)
        ========================================================= -->
-  <aside class="projects-dock" aria-label="Projects Switcher">
-    <div class="dock-title">Projects</div>
-
-    <!-- GitHub Profile -->
-    <a href="https://github.com/mak74ik" target="_blank" rel="noopener noreferrer" class="dock-item" aria-label="GitHub Profile">
-      <svg viewBox="0 0 24 24">
-        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-      </svg>
-      <div class="dock-tooltip">
-        <span class="dock-tooltip-title">
-          GitHub
-          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </span>
-        <span class="dock-tooltip-desc">@mak74ik • Code & Repos</span>
+  <aside id="projects-drawer" class="projects-drawer" aria-label="Projects & Links">
+    
+    <!-- Drawer Top -->
+    <div class="drawer-header">
+      <div class="drawer-title-wrap">
+        <span class="drawer-subtitle">Launchpad</span>
+        <h2 class="drawer-title">Projects & Links</h2>
       </div>
-    </a>
+      <button id="drawer-close-btn" class="drawer-close-btn" aria-label="Close Drawer">
+        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+    </div>
 
-    <!-- Nexus Mods Profile -->
-    <a href="https://www.nexusmods.com/users/mak74ik" target="_blank" rel="noopener noreferrer" class="dock-item" aria-label="Nexus Mods">
-      <svg viewBox="0 0 24 24">
-        <path d="M12.793 0L3.652 5.275v13.45L12.793 24l9.141-5.275V5.275L12.793 0zm5.666 16.518l-5.666 3.27-5.667-3.27V9.98l5.667-3.27 5.666 3.27v6.538z"/>
-      </svg>
-      <div class="dock-tooltip">
-        <span class="dock-tooltip-title">
-          Nexus Mods
-          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </span>
-        <span class="dock-tooltip-desc">Game Mods & Profiles</span>
-      </div>
-    </a>
+    <!-- macOS DOCK CONTAINER -->
+    <div id="macos-dock" class="macos-dock">
 
-    <!-- Alert Forecast Project -->
-    <a href="https://github.com/mak74ik/ukraine-alert-forecast" target="_blank" rel="noopener noreferrer" class="dock-item" aria-label="Alert Forecast">
-      <svg viewBox="0 0 24 24">
-        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V18a1 1 0 0 1-2 0v-1.07A6 6 0 0 1 6.07 12H5a1 1 0 0 1 0-2h1.07A6 6 0 0 1 11 5.07V4a1 1 0 0 1 2 0v1.07A6 6 0 0 1 17.93 10H19a1 1 0 0 1 0 2h-1.07A6 6 0 0 1 13 16.93zM12 8a4 4 0 1 0 4 4 4 4 0 0 0-4-4z"/>
-      </svg>
-      <div class="dock-tooltip">
-        <span class="dock-tooltip-title">
-          Alert Forecast
-          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </span>
-        <span class="dock-tooltip-desc">Ukraine Alert Tracker</span>
-      </div>
-    </a>
+      <!-- SECTION: PROJECTS -->
+      <div class="dock-section-title">Projects</div>
 
-    <!-- LiveWallpaper MacOS -->
-    <a href="https://github.com/mak74ik/LiveWallpaperMacOS" target="_blank" rel="noopener noreferrer" class="dock-item" aria-label="LiveWallpaper MacOS">
-      <svg viewBox="0 0 24 24">
-        <path d="M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm4 16h8v2H8v-2zm12-4V5H4v10h16z"/>
-      </svg>
-      <div class="dock-tooltip">
-        <span class="dock-tooltip-title">
-          LiveWallpaper
-          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </span>
-        <span class="dock-tooltip-desc">macOS Dynamic Engine</span>
-      </div>
-    </a>
+      <!-- 1. GitHub -->
+      <a href="https://github.com/mak74ik" target="_blank" rel="noopener noreferrer" class="dock-item">
+        <div class="dock-icon-box">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+        </div>
+        <div class="dock-details">
+          <div class="dock-name">
+            <span>GitHub</span>
+            <svg class="dock-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+          <div class="dock-desc">@mak74ik • Repositories & Code</div>
+        </div>
+      </a>
 
-    <!-- Steam Profile / Workshop -->
-    <a href="https://steamcommunity.com/id/bribable/" target="_blank" rel="noopener noreferrer" class="dock-item" aria-label="Steam Workshop">
-      <svg viewBox="0 0 24 24">
-        <path d="M24 12c0 6.627-5.373 12-12 12-5.782 0-10.608-4.091-11.744-9.537l4.764 2.003c.285 1.441 1.56 2.547 3.115 2.534 1.723-.017 3.105-1.414 3.116-3.129l.007-.003 3.602-2.684c2.304.024 4.14-1.833 4.14-4.091 0-2.26-1.834-4.093-4.093-4.093-2.234 0-4.048 1.791-4.09 4.015l-2.64 3.693c-.668-.014-1.269.169-1.791.51l-6.294-2.646c.708-5.953 5.765-10.572 11.908-10.572 6.627 0 12 5.373 12 12z"/>
-      </svg>
-      <div class="dock-tooltip">
-        <span class="dock-tooltip-title">
-          Steam
-          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </span>
-        <span class="dock-tooltip-desc">Gaming & Workshop</span>
-      </div>
-    </a>
+      <!-- 2. Nexus Mods -->
+      <a href="https://www.nexusmods.com/users/mak74ik" target="_blank" rel="noopener noreferrer" class="dock-item">
+        <div class="dock-icon-box">
+          <svg viewBox="0 0 24 24">
+            <path d="M12.793 0L3.652 5.275v13.45L12.793 24l9.141-5.275V5.275L12.793 0zm5.666 16.518l-5.666 3.27-5.667-3.27V9.98l5.667-3.27 5.666 3.27v6.538z"/>
+          </svg>
+        </div>
+        <div class="dock-details">
+          <div class="dock-name">
+            <span>Nexus Mods</span>
+            <svg class="dock-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+          <div class="dock-desc">Game Mods & Profiles</div>
+        </div>
+      </a>
+
+      <!-- 3. Alert Forecast -->
+      <a href="https://github.com/mak74ik/ukraine-alert-forecast" target="_blank" rel="noopener noreferrer" class="dock-item">
+        <div class="dock-icon-box">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V18a1 1 0 0 1-2 0v-1.07A6 6 0 0 1 6.07 12H5a1 1 0 0 1 0-2h1.07A6 6 0 0 1 11 5.07V4a1 1 0 0 1 2 0v1.07A6 6 0 0 1 17.93 10H19a1 1 0 0 1 0 2h-1.07A6 6 0 0 1 13 16.93zM12 8a4 4 0 1 0 4 4 4 4 0 0 0-4-4z"/>
+          </svg>
+        </div>
+        <div class="dock-details">
+          <div class="dock-name">
+            <span>Alert Forecast</span>
+            <svg class="dock-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+          <div class="dock-desc">Ukraine Alert Tracker Project</div>
+        </div>
+      </a>
+
+      <!-- 4. LiveWallpaper MacOS -->
+      <a href="https://github.com/mak74ik/LiveWallpaperMacOS" target="_blank" rel="noopener noreferrer" class="dock-item">
+        <div class="dock-icon-box">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm4 16h8v2H8v-2zm12-4V5H4v10h16z"/>
+          </svg>
+        </div>
+        <div class="dock-details">
+          <div class="dock-name">
+            <span>LiveWallpaper</span>
+            <svg class="dock-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+          <div class="dock-desc">macOS Dynamic Wallpaper Engine</div>
+        </div>
+      </a>
+
+      <!-- SECTION: SOCIAL & GAMING -->
+      <div class="dock-section-title">Social & Profiles</div>
+
+      <!-- 5. Steam -->
+      <a href="https://steamcommunity.com/id/bribable/" target="_blank" rel="noopener noreferrer" class="dock-item">
+        <div class="dock-icon-box">
+          <svg viewBox="0 0 24 24">
+            <path d="M24 12c0 6.627-5.373 12-12 12-5.782 0-10.608-4.091-11.744-9.537l4.764 2.003c.285 1.441 1.56 2.547 3.115 2.534 1.723-.017 3.105-1.414 3.116-3.129l.007-.003 3.602-2.684c2.304.024 4.14-1.833 4.14-4.091 0-2.26-1.834-4.093-4.093-4.093-2.234 0-4.048 1.791-4.09 4.015l-2.64 3.693c-.668-.014-1.269.169-1.791.51l-6.294-2.646c.708-5.953 5.765-10.572 11.908-10.572 6.627 0 12 5.373 12 12zm-16.577 5.477l-1.544-.649c.38.858 1.236 1.461 2.249 1.457 1.346-.012 2.422-1.11 2.41-2.455-.012-1.329-1.104-2.41-2.432-2.41-.287.001-.57.05-.86.16l1.542.648c.898.378 1.319 1.411.941 2.308-.376.896-1.409 1.318-2.306.941zm7.484-5.602c-1.533 0-2.781-1.249-2.781-2.782 0-1.534 1.248-2.782 2.781-2.782 1.534 0 2.781 1.248 2.781 2.782 0 1.533-1.247 2.782-2.781 2.782zm0-.682c1.159 0 2.1-.942 2.1-2.101 0-1.158-.94-2.102-2.1-2.102s-2.102.943-2.102 2.102c.001 1.159.943 2.101 2.102 2.101z"/>
+          </svg>
+        </div>
+        <div class="dock-details">
+          <div class="dock-name">
+            <span>Steam</span>
+            <svg class="dock-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+          <div class="dock-desc">bribable • Gaming & Workshop</div>
+        </div>
+      </a>
+
+      <!-- 6. Telegram -->
+      <a href="https://t.me/+g8HlBBrRy7EwNGMy" target="_blank" rel="noopener noreferrer" class="dock-item">
+        <div class="dock-icon-box">
+          <svg viewBox="0 0 24 24">
+            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+          </svg>
+        </div>
+        <div class="dock-details">
+          <div class="dock-name">
+            <span>Telegram</span>
+            <svg class="dock-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+          <div class="dock-desc">Join Private Chat / Channel</div>
+        </div>
+      </a>
+
+      <!-- 7. TikTok -->
+      <a href="https://www.tiktok.com/@mizyqqa" target="_blank" rel="noopener noreferrer" class="dock-item">
+        <div class="dock-icon-box">
+          <svg viewBox="0 0 24 24">
+            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+          </svg>
+        </div>
+        <div class="dock-details">
+          <div class="dock-name">
+            <span>TikTok</span>
+            <svg class="dock-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+          <div class="dock-desc">@mizyqqa • Videos & Clips</div>
+        </div>
+      </a>
+
+      <!-- 8. Spotify -->
+      <a href="https://open.spotify.com/user/31pe6cdbjwwqstyw4esshin6depa?si=0eee13eab1794490" target="_blank" rel="noopener noreferrer" class="dock-item">
+        <div class="dock-icon-box">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+          </svg>
+        </div>
+        <div class="dock-details">
+          <div class="dock-name">
+            <span>Spotify</span>
+            <svg class="dock-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+          <div class="dock-desc">Playlists & Music Profile</div>
+        </div>
+      </a>
+
+    </div>
   </aside>
 
   <script>
@@ -891,6 +1081,66 @@
     } else {
       revealScreen.addEventListener('click', enterBio);
     }
+
+    // -------------------------------------------------------------
+    // DOCK TOGGLE & SHIFT INTERACTION
+    // -------------------------------------------------------------
+    const dockToggleTab = document.getElementById('dock-toggle-tab');
+    const rightClickZone = document.getElementById('right-click-zone');
+    const drawerBackdrop = document.getElementById('drawer-backdrop');
+    const drawerCloseBtn = document.getElementById('drawer-close-btn');
+
+    function openDock() {
+      document.body.classList.add('dock-open');
+    }
+
+    function closeDock() {
+      document.body.classList.remove('dock-open');
+    }
+
+    dockToggleTab.addEventListener('click', openDock);
+    rightClickZone.addEventListener('click', openDock);
+    drawerBackdrop.addEventListener('click', closeDock);
+    drawerCloseBtn.addEventListener('click', closeDock);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDock();
+    });
+
+    // -------------------------------------------------------------
+    // macOS DOCK WAVE MAGNIFICATION EFFECT
+    // -------------------------------------------------------------
+    const dock = document.getElementById('macos-dock');
+    const dockItems = dock.querySelectorAll('.dock-item');
+
+    dock.addEventListener('mousemove', (e) => {
+      const mouseY = e.clientY;
+      const maxDist = 85;
+
+      dockItems.forEach(item => {
+        const rect = item.getBoundingClientRect();
+        const itemCenter = rect.top + rect.height / 2;
+        const dist = Math.abs(mouseY - itemCenter);
+
+        if (dist < maxDist) {
+          const factor = Math.cos((dist / maxDist) * (Math.PI / 2));
+          const scale = 1 + factor * 0.18;
+          const shift = -6 * factor;
+          item.style.transform = `scale(${scale}) translateX(${shift}px)`;
+          item.style.zIndex = '10';
+        } else {
+          item.style.transform = 'scale(1) translateX(0)';
+          item.style.zIndex = '1';
+        }
+      });
+    });
+
+    dock.addEventListener('mouseleave', () => {
+      dockItems.forEach(item => {
+        item.style.transform = 'scale(1) translateX(0)';
+        item.style.zIndex = '1';
+      });
+    });
 
     // -------------------------------------------------------------
     // Typing Title Animation
