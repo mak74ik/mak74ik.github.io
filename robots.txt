@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mak74ik.github.io/sitemap.xml
